@@ -1,13 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-struct Player {
+struct Player : sf::Sprite {
     // Transform
-    sf::Vector2f position;
-    float rotation;
     float floorOffset {0};
-
-    // Visuals
-    sf::RectangleShape rect;
 
     // Movement
     float groundAcceleration{800.f};
@@ -19,9 +14,24 @@ struct Player {
     float airDrag{1000.f};
     bool grounded;
     bool running;
-
+    bool facingLeft;
     sf::Vector2f velocity;
+    sf::Vector2f prevPosition;
+    
     void AddVelocity(const sf::Vector2f& addVelocity);
     void AddVelocity(float x, float y);
     void UpdatePosition(float deltaTime);
+
+    // Collision
+    sf::RectangleShape collisionRect;
+
+    float GetWidth() {
+        return getTexture()->getSize().x;
+    }
+    float GetHeight() {
+        return getTexture()->getSize().y;
+    }
+    const sf::Vector2u getSize() {
+        return getTexture()->getSize();
+    }
 };

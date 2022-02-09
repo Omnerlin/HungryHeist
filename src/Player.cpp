@@ -1,16 +1,9 @@
 #include <Player.h>
 void Player::UpdatePosition(float deltaTime) {
-    position += velocity * deltaTime;
-
-    if (position.y < floorOffset) {
-        grounded = false;
-        // velocity.y += gravity * deltaTime;
-        AddVelocity(0, gravity * deltaTime);
-    } else {
-        position.y = floorOffset;
-        velocity.y = 0;
-        grounded = true;
-    }
+    sf::Vector2f currentPosition = getPosition();
+    prevPosition = currentPosition;
+    AddVelocity(0, gravity * deltaTime);
+    currentPosition += velocity * deltaTime;
 
     if (!running) {
         if (velocity.x > 0) {
@@ -26,8 +19,8 @@ void Player::UpdatePosition(float deltaTime) {
         }
     }
 
-    rect.setPosition(position);
-    rect.setRotation(rotation);
+    setScale(facingLeft ? -1 : 1, 1);
+    setPosition(currentPosition);
 }
 
 void Player::AddVelocity(const sf::Vector2f& addVelocity) {

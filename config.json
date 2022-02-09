@@ -1,14 +1,14 @@
 {
-    "playerSizeX": 32,
-    "playerSizeY": 32,
     "playerGroundAcceleration": 1200,
     "playerFriction": 2500,
-    "playerMaxSpeedX": 350,
+    "playerMaxSpeedX": 200,
     "playerMaxSpeedY": 5000,
     "playerGravity": 1000.0,
-    "playerJumpForce": 300,
+    "playerJumpForce": 400,
     "playerAirDrag": 400,
     "playerFloorOffset": -8,
+    "playerCollisionSizeX": 14,
+    "playerCollisionSizeY": 18,
     "playerAnimation": {
         "name": "walk",
         "width": 32,

@@ -3,8 +3,8 @@
 #include <SFML/Graphics.hpp>
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <Player.h>
+#include <Utils.h>
 #include <unistd.h>
-
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -23,12 +23,14 @@ void ReadJson(Player& player) {
     try {
         nlohmann::json json;
         json = nlohmann::json::parse(configBuffer.str());
-        float playerSizeX = json["playerSizeX"].get<float>();
-        float playerSizeY = json["playerSizeY"].get<float>();
+        float collisionSizeX = json["playerCollisionSizeX"].get<float>();
+        float collisionSizeY = json["playerCollisionSizeY"].get<float>();
 
-        player.rect.setSize(sf::Vector2f(playerSizeX, playerSizeY));
-        player.rect.setOrigin(player.rect.getSize().x / 2,
-                              player.rect.getSize().y);
+        player.collisionRect.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
+        player.collisionRect.setOrigin(player.collisionRect.getSize().x / 2,
+                    player.collisionRect.getSize().y);
+        player.setOrigin(player.getTexture()->getSize().x / 2,
+                         player.getTexture()->getSize().y);
         player.groundAcceleration =
             json["playerGroundAcceleration"].get<float>();
         player.friction = json["playerFriction"].get<float>();
@@ -46,33 +48,47 @@ void ReadJson(Player& player) {
 
 int main() {
     // Create Window
-    sf::Vector2f referenceResolution(16 * 16.f, 16 * 9.f); // Reference Resolution for pixel art.
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Graphics"); // Window Size
+    sf::Vector2f referenceResolution(
+        16 * 16.f, 16 * 9.f);  // Reference Resolution for pixel art.
+    sf::RenderWindow window(sf::VideoMode(1280, 720),
+                            "Graphics");  // Window Size
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
-    sf::View mainCamera(sf::Vector2f(0.f, -referenceResolution.y / 2.f),
-                        sf::Vector2f(referenceResolution.x, referenceResolution.y));
+    sf::View mainCamera(
+        sf::Vector2f(0.f, -referenceResolution.y / 2.f),
+        sf::Vector2f(referenceResolution.x, referenceResolution.y));
     window.setView(mainCamera);
     sf::Clock deltaClock;
 
     // Initialize Player
     Player player;
-    player.rect.setSize(sf::Vector2f(32.f, 32.f));
-    player.rect.setOrigin(player.rect.getSize().x / 2, player.rect.getSize().y);
-    player.position.x = 0;
-    player.position.y = 0;
     sf::Texture playerTexture;
     playerTexture.loadFromFile("assets/textures/Sphynx01.png");
-    player.rect.setTexture(&playerTexture);
+    player.setTexture(playerTexture);
+    player.setOrigin(player.getTexture()->getSize().x / 2,
+                     player.getTexture()->getSize().y);
 
     // Background :)
-    sf::RectangleShape rect;
+    sf::RectangleShape background;
     sf::Texture texture;
     texture.loadFromFile("assets/textures/kitchen2.png");
-    rect.setSize(sf::Vector2f(texture.getSize().x, texture.getSize().y));
-    rect.setScale(rect.getScale().x / 2, rect.getScale().y / 2);
-    rect.setTexture(&texture, true);
-    rect.setOrigin(rect.getSize().x / 2, rect.getSize().y - 82);
+    background.setSize(sf::Vector2f(texture.getSize().x, texture.getSize().y));
+    background.setScale(background.getScale().x / 2,
+                        background.getScale().y / 2);
+    background.setTexture(&texture, true);
+    background.setOrigin(background.getSize().x / 2,
+                         background.getSize().y - 82);
+
+    // Debug Player
+    sf::RectangleShape playerCollision(sf::Vector2f(32, 32));
+    playerCollision.setOrigin(player.getOrigin());
+
+    // Test collision
+    sf::RectangleShape collisionRect;
+    collisionRect.setSize(sf::Vector2f(32, 32));
+    collisionRect.setFillColor(sf::Color(141, 81, 0, 255));
+    collisionRect.setOutlineColor(sf::Color::Black);
+    collisionRect.setPosition(0, -74);
 
     ReadJson(player);
 
@@ -96,12 +112,14 @@ int main() {
             if (player.grounded && player.velocity.x > 0) player.velocity.x = 0;
             player.AddVelocity(
                 -sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
+            player.facingLeft = false;
         }
         if (Input::KeyIsDown(KeyCode::D)) {
             if (player.grounded && player.velocity.x < 0) player.velocity.x = 0;
             player.running = true;
             player.AddVelocity(
                 sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
+            player.facingLeft = true;
         }
 
         // Pressed Keys
@@ -119,8 +137,49 @@ int main() {
         }
 
         player.UpdatePosition(deltaTime);
-        window.draw(rect);
-        window.draw(player.rect);
+        player.collisionRect.setPosition(player.getPosition());
+
+        player.grounded = false;
+        if(player.getPosition().y >= player.floorOffset) {
+            player.setPosition(player.getPosition().x, player.floorOffset);
+            player.velocity.y = 0;
+            player.grounded = true;
+        }
+
+        // Test collision for player
+        if(collisionRect.getGlobalBounds().intersects(player.collisionRect.getGlobalBounds())) {
+            if(player.velocity.y < 0 && player.prevPosition.y > (collisionRect.getPosition().y + collisionRect.getSize().y + player.collisionRect.getSize().y)) {
+                // We hit the bottom
+                player.velocity.y = 0;
+                player.setPosition(player.getPosition().x, collisionRect.getPosition().y + collisionRect.getSize().y + player.collisionRect.getSize().y);
+            }
+            else if(player.velocity.y > 0 && player.prevPosition.y <= (collisionRect.getPosition().y)) {
+                // We hit the top
+                player.grounded = true;
+                player.velocity.y = 0;
+                player.setPosition(player.getPosition().x, collisionRect.getPosition().y);
+            }
+            else if(player.velocity.x > 0 && (player.prevPosition.x + player.collisionRect.getSize().x / 2) <= collisionRect.getPosition().x) {
+                // We hit the left side
+                player.velocity.x = 0;
+                player.setPosition(collisionRect.getPosition().x - player.collisionRect.getSize().x / 2, player.getPosition().y);
+            }
+            else if(player.velocity.x < 0 && (player.prevPosition.x - player.collisionRect.getSize().x / 2) >= collisionRect.getPosition().x + collisionRect.getSize().x) {
+                // We hit the right side
+                player.velocity.x = 0;
+                player.setPosition(collisionRect.getPosition().x + collisionRect.getSize().x + player.collisionRect.getSize().x / 2, player.getPosition().y);
+            }            
+        }
+
+        player.collisionRect.setPosition(player.getPosition());
+        player.collisionRect.setFillColor(player.grounded ? sf::Color::Green : sf::Color::Red);
+
+        //mainCamera.setCenter(lerp(mainCamera.getCenter().x, player.getPosition().x, 1.6 * deltaTime), lerp(mainCamera.getCenter().y, player.getPosition().y + -32, 1.6 * deltaTime));
+        window.setView(mainCamera);
+        window.draw(background);
+        window.draw(player.collisionRect);
+        window.draw(player);
+        window.draw(collisionRect);
         window.display();
     }
 
