@@ -6,7 +6,7 @@
 #include <json.hpp>
 #include <sstream>
 
-class Player;
+struct Player;
 
 enum ColliderType {
     Solid,

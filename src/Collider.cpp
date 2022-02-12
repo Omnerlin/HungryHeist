@@ -49,14 +49,16 @@ std::vector<Collider> LoadCollidersFromConfig() {
         // iterate the array
         for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it) {
             std::cout << *it << '\n';
+            nlohmann::json value = it.value();
             Collider c;
-            float collisionSizeX = it.value()["width"].get<float>();
-            float collisionSizeY = it.value()["height"].get<float>();
+            float collisionSizeX = value["width"].get<float>();
+            float collisionSizeY = value["height"].get<float>();
             c.rect.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
-            float posX = it.value()["x"].get<float>();
-            float posY = it.value()["y"].get<float>();
+            float posX = value["x"].get<float>();
+            float posY = value["y"].get<float>();
             c.rect.setPosition(posX, posY);
-            c.colliderType = (ColliderType)it.value()["type"].get<int>();
+            c.colliderType = (ColliderType)value["type"].get<int>();
+            c.collisionDirection = (CollisionDirection)value["direction"].get<int>();
             returnValue.push_back(c);
         }
         return returnValue;
