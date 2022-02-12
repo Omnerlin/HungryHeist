@@ -1,3 +1,4 @@
+#pragma once
 #include <Typedefs.h>
 #include <string>
 #include <vector>

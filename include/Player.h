@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+
 struct Player : sf::Sprite {
     // Transform
     float floorOffset {0};
@@ -21,6 +22,7 @@ struct Player : sf::Sprite {
     void AddVelocity(const sf::Vector2f& addVelocity);
     void AddVelocity(float x, float y);
     void UpdatePosition(float deltaTime);
+    void LoadSettingsFromConfig();
 
     // Collision
     sf::RectangleShape collisionRect;
@@ -35,3 +37,4 @@ struct Player : sf::Sprite {
         return getTexture()->getSize();
     }
 };
+

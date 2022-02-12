@@ -4,46 +4,12 @@
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <Player.h>
 #include <Utils.h>
-#include <unistd.h>
 #include <algorithm>
-#include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <json.hpp>
-#include <sstream>
+#include <Collider.h>
 
 void ReadJson(Player& player) {
-    char tmp[256];
-    getcwd(tmp, 256);
-    std::cout << "Current working directory: " << tmp << std::endl;
-    std::ifstream config("config.json");
-    std::stringstream configBuffer;
-    configBuffer << config.rdbuf();
-
-    try {
-        nlohmann::json json;
-        json = nlohmann::json::parse(configBuffer.str());
-        float collisionSizeX = json["playerCollisionSizeX"].get<float>();
-        float collisionSizeY = json["playerCollisionSizeY"].get<float>();
-
-        player.collisionRect.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
-        player.collisionRect.setOrigin(player.collisionRect.getSize().x / 2,
-                    player.collisionRect.getSize().y);
-        player.setOrigin(player.getTexture()->getSize().x / 2,
-                         player.getTexture()->getSize().y);
-        player.groundAcceleration =
-            json["playerGroundAcceleration"].get<float>();
-        player.friction = json["playerFriction"].get<float>();
-        player.maxSpeedX = json["playerMaxSpeedX"].get<float>();
-        player.maxSpeedY = json["playerMaxSpeedY"].get<float>();
-        player.gravity = json["playerGravity"].get<float>();
-        player.jumpForce = json["playerJumpForce"].get<float>();
-        player.airDrag = json["playerAirDrag"].get<float>();
-        player.floorOffset = json["playerFloorOffset"].get<float>();
-    } catch (const std::exception& e) {
-        std::cout << "Error opening config file." << std::endl;
-        std::cerr << e.what() << std::endl;
-    }
+    player.LoadSettingsFromConfig();
 }
 
 int main() {
@@ -68,7 +34,7 @@ int main() {
     player.setOrigin(player.getTexture()->getSize().x / 2,
                      player.getTexture()->getSize().y);
 
-    // Background :)
+    // Background
     sf::RectangleShape background;
     sf::Texture texture;
     texture.loadFromFile("assets/textures/kitchen2.png");
@@ -84,13 +50,20 @@ int main() {
     playerCollision.setOrigin(player.getOrigin());
 
     // Test collision
-    sf::RectangleShape collisionRect;
-    collisionRect.setSize(sf::Vector2f(32, 32));
-    collisionRect.setFillColor(sf::Color(141, 81, 0, 255));
-    collisionRect.setOutlineColor(sf::Color::Black);
-    collisionRect.setPosition(0, -74);
+
+
+    // Collider colliders[4];
+    // for(int i = 0; i < 4; i++) {
+    //     if(i == 0) colliders[i].colliderType = ColliderType::Trigger;
+    //     colliders[i].rect.setSize(sf::Vector2f(18,18));
+    //     colliders[i].rect.setPosition(45 * i - 60, -32);
+    //     colliders[i].rect.setFillColor(sf::Color::White);
+    // }
+
+
 
     ReadJson(player);
+    auto colliders = LoadCollidersFromConfig();
 
     while (window.isOpen()) {
         Input::ClearPressedKeys();
@@ -126,6 +99,7 @@ int main() {
         if (Input::KeyWasPressed(KeyCode::J)) {
             std::cout << "Reloading config file." << std::endl;
             ReadJson(player);
+            colliders = LoadCollidersFromConfig();
             std::cout << "Done." << std::endl;
         }
         if (Input::KeyWasPressed(KeyCode::Escape)) {
@@ -146,40 +120,20 @@ int main() {
             player.grounded = true;
         }
 
-        // Test collision for player
-        if(collisionRect.getGlobalBounds().intersects(player.collisionRect.getGlobalBounds())) {
-            if(player.velocity.y < 0 && player.prevPosition.y > (collisionRect.getPosition().y + collisionRect.getSize().y + player.collisionRect.getSize().y)) {
-                // We hit the bottom
-                player.velocity.y = 0;
-                player.setPosition(player.getPosition().x, collisionRect.getPosition().y + collisionRect.getSize().y + player.collisionRect.getSize().y);
-            }
-            else if(player.velocity.y > 0 && player.prevPosition.y <= (collisionRect.getPosition().y)) {
-                // We hit the top
-                player.grounded = true;
-                player.velocity.y = 0;
-                player.setPosition(player.getPosition().x, collisionRect.getPosition().y);
-            }
-            else if(player.velocity.x > 0 && (player.prevPosition.x + player.collisionRect.getSize().x / 2) <= collisionRect.getPosition().x) {
-                // We hit the left side
-                player.velocity.x = 0;
-                player.setPosition(collisionRect.getPosition().x - player.collisionRect.getSize().x / 2, player.getPosition().y);
-            }
-            else if(player.velocity.x < 0 && (player.prevPosition.x - player.collisionRect.getSize().x / 2) >= collisionRect.getPosition().x + collisionRect.getSize().x) {
-                // We hit the right side
-                player.velocity.x = 0;
-                player.setPosition(collisionRect.getPosition().x + collisionRect.getSize().x + player.collisionRect.getSize().x / 2, player.getPosition().y);
-            }            
+        for(size_t i = 0; i < colliders.size(); i++) {
+            colliders[i].ResolveCollisionAgainstPlayer(player);
         }
 
         player.collisionRect.setPosition(player.getPosition());
         player.collisionRect.setFillColor(player.grounded ? sf::Color::Green : sf::Color::Red);
 
-        //mainCamera.setCenter(lerp(mainCamera.getCenter().x, player.getPosition().x, 1.6 * deltaTime), lerp(mainCamera.getCenter().y, player.getPosition().y + -32, 1.6 * deltaTime));
         window.setView(mainCamera);
         window.draw(background);
-        window.draw(player.collisionRect);
+        //window.draw(player.collisionRect);
+        for(size_t i = 0; i < colliders.size(); i++) {
+            window.draw(colliders[i].rect);
+        }
         window.draw(player);
-        window.draw(collisionRect);
         window.display();
     }
 
