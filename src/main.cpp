@@ -38,9 +38,9 @@ int main() {
     sf::Vector2f referenceResolution(
         256, 144);  // Reference Resolution for pixel art.
     sf::RenderWindow window(sf::VideoMode(1280, 720),
-                            "Graphics");  // Window Size
+                            "Graphics", sf::Style::Fullscreen);  // Window Size
     window.setVerticalSyncEnabled(true);
-    window.setFramerateLimit(60);
+    //window.setFramerateLimit(60);
     sf::View mainCamera(
         sf::Vector2f(0.f, -referenceResolution.y / 2.f),
         sf::Vector2f(referenceResolution.x, referenceResolution.y));
@@ -50,6 +50,11 @@ int main() {
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,4);
     std::uniform_int_distribution<int> colorDistribution(0,5);
+
+    sf::Text performanceText;
+    performanceText.setCharacterSize(10);
+    performanceText.setFillColor(sf::Color::Black);
+    performanceText.setStyle(sf::Text::Bold);
 
     // Initialize Player
     Player player;
@@ -88,8 +93,14 @@ int main() {
             }
         }
 
-        float deltaTime = deltaClock.restart().asSeconds();
+        sf::Time time = deltaClock.restart();
+        float deltaTime = time.asSeconds();
         window.clear();
+        sf::Font font;
+        font.loadFromFile("assets/fonts/FiraCode.ttf");
+        performanceText.setFont(font);
+        performanceText.setPosition(-100, -100);
+        performanceText.setString("Performance (ms): " + std::to_string(time.asMilliseconds()));
 
         // Held Keys
         player.running = false;
@@ -160,6 +171,7 @@ int main() {
             window.draw(hands[i]);
         }
         window.draw(player);
+        window.draw(performanceText);
         window.display();
     }
 
