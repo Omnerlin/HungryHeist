@@ -2,20 +2,41 @@
 
 #include <SFML/Graphics.hpp>
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
+#include <Collider.h>
+#include <Hand.h>
 #include <Player.h>
 #include <Utils.h>
+#include <random>
 #include <algorithm>
 #include <iostream>
-#include <Collider.h>
 
-void ReadJson(Player& player) {
-    player.LoadSettingsFromConfig();
+void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
+                     const sf::Texture& handTexture, HandSpawnDirection direction, sf::Color handColor) {
+    Hand* handToAttackWith = nullptr;
+    for (size_t i = 0; i < hands.size(); i++) {
+        if (hands[i].done) {
+            handToAttackWith = &hands[i];
+            break;
+        }
+    }
+    if (handToAttackWith == nullptr) {
+        std::cout << "Spawning a new hand" << std::endl;
+        Hand hand;
+        hand.setOrigin(32, 0);
+        hand.setTexture(handTexture);
+        hands.push_back(hand);
+        handToAttackWith = &hands[hands.size() - 1];
+    }
+    handToAttackWith->setColor(handColor);
+    handToAttackWith->Attack(direction, view, 0.75f);
 }
+
+void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
 
 int main() {
     // Create Window
     sf::Vector2f referenceResolution(
-        16 * 16.f, 16 * 9.f);  // Reference Resolution for pixel art.
+        256, 144);  // Reference Resolution for pixel art.
     sf::RenderWindow window(sf::VideoMode(1280, 720),
                             "Graphics");  // Window Size
     window.setVerticalSyncEnabled(true);
@@ -25,6 +46,10 @@ int main() {
         sf::Vector2f(referenceResolution.x, referenceResolution.y));
     window.setView(mainCamera);
     sf::Clock deltaClock;
+
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,4);
+    std::uniform_int_distribution<int> colorDistribution(0,5);
 
     // Initialize Player
     Player player;
@@ -45,22 +70,10 @@ int main() {
     background.setOrigin(background.getSize().x / 2,
                          background.getSize().y - 82);
 
-    // Debug Player
-    sf::RectangleShape playerCollision(sf::Vector2f(32, 32));
-    playerCollision.setOrigin(player.getOrigin());
-
-    // Test collision
-
-
-    // Collider colliders[4];
-    // for(int i = 0; i < 4; i++) {
-    //     if(i == 0) colliders[i].colliderType = ColliderType::Trigger;
-    //     colliders[i].rect.setSize(sf::Vector2f(18,18));
-    //     colliders[i].rect.setPosition(45 * i - 60, -32);
-    //     colliders[i].rect.setFillColor(sf::Color::White);
-    // }
-
-
+    // Hands
+    sf::Texture handTexture;
+    handTexture.loadFromFile("assets/textures/Hand.png");
+    std::vector<Hand> hands;
 
     ReadJson(player);
     auto colliders = LoadCollidersFromConfig();
@@ -102,6 +115,11 @@ int main() {
             colliders = LoadCollidersFromConfig();
             std::cout << "Done." << std::endl;
         }
+
+        if (Input::KeyWasPressed(KeyCode::H)) {
+            AttackWithAHand(hands, mainCamera, handTexture, (HandSpawnDirection)(distribution(generator)), Hand::SkinColors[colorDistribution(generator)]);
+        }
+
         if (Input::KeyWasPressed(KeyCode::Escape)) {
             std::cout << "Exiting..." << std::endl;
             window.close();
@@ -114,24 +132,32 @@ int main() {
         player.collisionRect.setPosition(player.getPosition());
 
         player.grounded = false;
-        if(player.getPosition().y >= player.floorOffset) {
+        if (player.getPosition().y >= player.floorOffset) {
             player.setPosition(player.getPosition().x, player.floorOffset);
             player.velocity.y = 0;
             player.grounded = true;
         }
 
-        for(size_t i = 0; i < colliders.size(); i++) {
+        for (size_t i = 0; i < colliders.size(); i++) {
             colliders[i].ResolveCollisionAgainstPlayer(player);
         }
 
         player.collisionRect.setPosition(player.getPosition());
-        player.collisionRect.setFillColor(player.grounded ? sf::Color::Green : sf::Color::Red);
+        player.collisionRect.setFillColor(player.grounded ? sf::Color::Green
+                                                          : sf::Color::Red);
+
+        for (size_t i = 0; i < hands.size(); i++) {
+            hands[i].Update(deltaTime);
+        }
 
         window.setView(mainCamera);
         window.draw(background);
-        //window.draw(player.collisionRect);
-        for(size_t i = 0; i < colliders.size(); i++) {
+        // window.draw(player.collisionRect);
+        for (size_t i = 0; i < colliders.size(); i++) {
             window.draw(colliders[i].rect);
+        }
+        for (size_t i = 0; i < hands.size(); i++) {
+            window.draw(hands[i]);
         }
         window.draw(player);
         window.display();
