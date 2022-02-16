@@ -10,6 +10,14 @@
 #include <algorithm>
 #include <iostream>
 
+/*
+Hand Layout            --|---|---|---|--
+                       |               |
+--- = Wall            -               -
+| = Hand               |               |
+                       --|---|---|---|--
+*/
+
 void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
                      const sf::Texture& handTexture, HandSpawnDirection direction, sf::Color handColor) {
     Hand* handToAttackWith = nullptr;
@@ -24,6 +32,7 @@ void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
         Hand hand;
         hand.setOrigin(32, 0);
         hand.setTexture(handTexture);
+//        hand.attackFinishedCallbacks.push_back([&](){PrintDone(1);});
         hands.push_back(hand);
         handToAttackWith = &hands[hands.size() - 1];
     }
@@ -38,9 +47,9 @@ int main() {
     sf::Vector2f referenceResolution(
         256, 144);  // Reference Resolution for pixel art.
     sf::RenderWindow window(sf::VideoMode(1280, 720),
-                            "Graphics", sf::Style::Fullscreen);  // Window Size
-    window.setVerticalSyncEnabled(true);
-    //window.setFramerateLimit(60);
+                            "Graphics");  // Window Size
+    //window.setVerticalSyncEnabled(true);
+    window.setFramerateLimit(60);
     sf::View mainCamera(
         sf::Vector2f(0.f, -referenceResolution.y / 2.f),
         sf::Vector2f(referenceResolution.x, referenceResolution.y));

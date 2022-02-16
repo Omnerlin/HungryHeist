@@ -44,15 +44,6 @@ void Hand::SetHandState(HandState state) {
     _timeSinceStateChange = 0;
     _currentState = state;
     SetOpen(state == HandState::Attacking);
-    // switch (state) {
-    //     case HandState::Waiting:
-    //     case HandState::Retreating:
-    //         SetOpen(false);
-    //         break;
-    //     case HandState::Attacking:
-    //         SetOpen(true);
-    //         break;
-    // }
 }
 
 bool Hand::IsOpen() { return _open; }
@@ -96,6 +87,9 @@ void Hand::Update(float deltaTime) {
             if(_timeSinceStateChange >= _speed) {
                 setPosition(_homePosition);
                 done = true;
+                // for(auto c : attackFinishedCallbacks) {
+                //     c();
+                // }
                 SetHandState(HandState::Waiting);
             } else {
                 setPosition(posX, posY);

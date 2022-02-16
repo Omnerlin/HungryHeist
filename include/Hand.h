@@ -1,11 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <functional>
 
 enum HandSpawnDirection { FromLeft = 0, FromRight = 1, FromTop = 2, FromBottom = 3 };
 
 struct Hand : sf::Sprite {
     static sf::Color SkinColors[];
     enum HandState { Waiting, Attacking, Retreating };
+    //std::vector<std::function<void()>> attackFinishedCallbacks;
+    sf::RectangleShape grabTrigger;
     void Attack(HandSpawnDirection from, sf::View view, float speed);
     void SetOpen(bool opened);
     bool IsOpen();
