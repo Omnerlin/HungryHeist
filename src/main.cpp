@@ -13,13 +13,12 @@
 /*
 Hand Layout            --|---|---|---|--
                        |               |
---- = Wall            -               -
+--- = Wall             -               -
 | = Hand               |               |
                        --|---|---|---|--
 */
-
 void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
-                     const sf::Texture& handTexture, HandSpawnDirection direction, sf::Color handColor) {
+                     const sf::Texture& handTexture, HandSpawnDirection direction, float offset, sf::Color handColor) {
     Hand* handToAttackWith = nullptr;
     for (size_t i = 0; i < hands.size(); i++) {
         if (hands[i].done) {
@@ -31,13 +30,16 @@ void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
         std::cout << "Spawning a new hand" << std::endl;
         Hand hand;
         hand.setOrigin(32, 0);
+        hand.grabTrigger.colliderType = ColliderType::Trigger;
+        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75));
+        hand.grabTrigger.rect.setOrigin(25,0);
         hand.setTexture(handTexture);
 //        hand.attackFinishedCallbacks.push_back([&](){PrintDone(1);});
         hands.push_back(hand);
         handToAttackWith = &hands[hands.size() - 1];
     }
     handToAttackWith->setColor(handColor);
-    handToAttackWith->Attack(direction, view, 0.75f);
+    handToAttackWith->Attack(direction, view, 0.75f, offset);
 }
 
 void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
@@ -137,7 +139,7 @@ int main() {
         }
 
         if (Input::KeyWasPressed(KeyCode::H)) {
-            AttackWithAHand(hands, mainCamera, handTexture, (HandSpawnDirection)(distribution(generator)), Hand::SkinColors[colorDistribution(generator)]);
+            AttackWithAHand(hands, mainCamera, handTexture, (HandSpawnDirection)(distribution(generator)), 64, Hand::SkinColors[colorDistribution(generator)]);
         }
 
         if (Input::KeyWasPressed(KeyCode::Escape)) {
@@ -168,6 +170,7 @@ int main() {
 
         for (size_t i = 0; i < hands.size(); i++) {
             hands[i].Update(deltaTime);
+            hands[i].grabTrigger.ResolveTriggerOverlapAgainstPlayer(player);
         }
 
         window.setView(mainCamera);
@@ -178,6 +181,7 @@ int main() {
         }
         for (size_t i = 0; i < hands.size(); i++) {
             window.draw(hands[i]);
+            window.draw(hands[i].grabTrigger.rect);
         }
         window.draw(player);
         window.draw(performanceText);

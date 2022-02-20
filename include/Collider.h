@@ -5,6 +5,7 @@
 #include <iostream>
 #include <json.hpp>
 #include <sstream>
+#include <functional>
 
 struct Player;
 
@@ -27,8 +28,14 @@ struct Collider {
     ColliderType colliderType = ColliderType::Solid;
     CollisionDirection collisionDirection = CollisionDirection::All;
     sf::RectangleShape rect;
+    std::vector<std::function<void(Player*)>> OverlapBeginCallbacks;
+    std::vector<std::function<void(Player*)>> OverlapEndCallbacks;
     bool HasCollisionDirectionEnabled(CollisionDirection direction);
-    bool ResolveCollisionAgainstPlayer(Player& player);
+    void ResolveCollisionAgainstPlayer(Player& player);
+    void ResolveTriggerOverlapAgainstPlayer(Player& player);
+
+    private:
+    bool _overlappingPlayer;
 };
 
 std::vector<Collider> LoadCollidersFromConfig();

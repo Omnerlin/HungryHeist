@@ -9,7 +9,7 @@ sf::Color Hand::SkinColors[] {
     sf::Color(141, 85, 36),
 };
 
-void Hand::Attack(HandSpawnDirection from, sf::View view, float speed) {
+void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float offset) {
     done = false;
     _speed = speed;
     _attackDirection = from;
@@ -17,8 +17,8 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed) {
     switch (from) {
         case HandSpawnDirection::FromLeft:
             setRotation(90);
-            _homePosition = sf::Vector2f(-viewHalfSize.x, -viewHalfSize.y);
-            _targetPosition = sf::Vector2f(viewHalfSize.x, -viewHalfSize.y);
+            _homePosition = sf::Vector2f(-viewHalfSize.x, -offset);
+            _targetPosition = sf::Vector2f(viewHalfSize.x, -offset);
             break;
         case HandSpawnDirection::FromTop:
             setRotation(180);
@@ -62,7 +62,7 @@ void Hand::Update(float deltaTime) {
     switch (_currentState) {
         // Pausing before retreat
         case HandState::Waiting:
-            if (_timeSinceStateChange >= 0.5f)
+            if (_timeSinceStateChange >= _returnDelay)
                 SetHandState(HandState::Retreating);
             break;
 
@@ -96,4 +96,6 @@ void Hand::Update(float deltaTime) {
             }
             break;
     }
+    grabTrigger.rect.setPosition(getPosition());
+    grabTrigger.rect.setRotation(getRotation());
 }

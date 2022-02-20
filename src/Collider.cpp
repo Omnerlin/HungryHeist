@@ -5,35 +5,68 @@ bool Collider::HasCollisionDirectionEnabled(CollisionDirection direction) {
     return (direction | collisionDirection) == collisionDirection;
 }
 
-bool Collider::ResolveCollisionAgainstPlayer(Player& player) {
-    if(colliderType == ColliderType::Trigger) return false;
+void Collider::ResolveTriggerOverlapAgainstPlayer(Player& player) {
+    if (colliderType == ColliderType::Solid) return;
 
-        // Test collision for player
-    if(rect.getGlobalBounds().intersects(player.collisionRect.getGlobalBounds())) {
-        if(HasCollisionDirectionEnabled(Bottom) && player.velocity.y < 0 && player.prevPosition.y > (rect.getPosition().y + rect.getSize().y + player.collisionRect.getSize().y)) {
+    bool overlapping = rect.getGlobalBounds().intersects(
+        player.collisionRect.getGlobalBounds());
+
+    if (overlapping && !_overlappingPlayer) {
+        _overlappingPlayer = true;
+        rect.setFillColor(sf::Color::Green);
+        for (auto c : OverlapBeginCallbacks) {
+            c(&player);
+        }
+    } else if (!overlapping && _overlappingPlayer) {
+        _overlappingPlayer = false;
+        rect.setFillColor(sf::Color::Yellow);
+        for (auto c : OverlapBeginCallbacks) {
+            c(&player);
+        }
+    }
+}
+
+void Collider::ResolveCollisionAgainstPlayer(Player& player) {
+    if (colliderType == ColliderType::Trigger) return;
+
+    // Test collision for player
+    if (rect.getGlobalBounds().intersects(
+            player.collisionRect.getGlobalBounds())) {
+        if (HasCollisionDirectionEnabled(Bottom) && player.velocity.y < 0 &&
+            player.prevPosition.y > (rect.getPosition().y + rect.getSize().y +
+                                     player.collisionRect.getSize().y)) {
             // We hit the bottom
             player.velocity.y = 0;
-            player.setPosition(player.getPosition().x, rect.getPosition().y + rect.getSize().y + player.collisionRect.getSize().y);
-        }
-        else if(HasCollisionDirectionEnabled(Top) &&  player.velocity.y > 0 && player.prevPosition.y <= (rect.getPosition().y)) {
+            player.setPosition(player.getPosition().x,
+                               rect.getPosition().y + rect.getSize().y +
+                                   player.collisionRect.getSize().y);
+        } else if (HasCollisionDirectionEnabled(Top) && player.velocity.y > 0 &&
+                   player.prevPosition.y <= (rect.getPosition().y)) {
             // We hit the top
             player.grounded = true;
             player.velocity.y = 0;
             player.setPosition(player.getPosition().x, rect.getPosition().y);
-        }
-        else if(HasCollisionDirectionEnabled(Left) && player.velocity.x > 0 && (player.prevPosition.x + player.collisionRect.getSize().x / 2) <= rect.getPosition().x) {
+        } else if (HasCollisionDirectionEnabled(Left) &&
+                   player.velocity.x > 0 &&
+                   (player.prevPosition.x + player.collisionRect.getSize().x /
+                                                2) <= rect.getPosition().x) {
             // We hit the left side
             player.velocity.x = 0;
-            player.setPosition(rect.getPosition().x - player.collisionRect.getSize().x / 2, player.getPosition().y);
-        }
-        else if(HasCollisionDirectionEnabled(Right) && player.velocity.x < 0 && (player.prevPosition.x - player.collisionRect.getSize().x / 2) >= rect.getPosition().x + rect.getSize().x) {
+            player.setPosition(
+                rect.getPosition().x - player.collisionRect.getSize().x / 2,
+                player.getPosition().y);
+        } else if (HasCollisionDirectionEnabled(Right) &&
+                   player.velocity.x < 0 &&
+                   (player.prevPosition.x -
+                    player.collisionRect.getSize().x / 2) >=
+                       rect.getPosition().x + rect.getSize().x) {
             // We hit the right side
             player.velocity.x = 0;
-            player.setPosition(rect.getPosition().x + rect.getSize().x + player.collisionRect.getSize().x / 2, player.getPosition().y);
-        }            
+            player.setPosition(rect.getPosition().x + rect.getSize().x +
+                                   player.collisionRect.getSize().x / 2,
+                               player.getPosition().y);
+        }
     }
-
-    return true;
 }
 
 std::vector<Collider> LoadCollidersFromConfig() {
@@ -58,7 +91,8 @@ std::vector<Collider> LoadCollidersFromConfig() {
             float posY = value["y"].get<float>();
             c.rect.setPosition(posX, posY);
             c.colliderType = (ColliderType)value["type"].get<int>();
-            c.collisionDirection = (CollisionDirection)value["direction"].get<int>();
+            c.collisionDirection =
+                (CollisionDirection)value["direction"].get<int>();
             returnValue.push_back(c);
         }
         return returnValue;
