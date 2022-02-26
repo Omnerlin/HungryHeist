@@ -6,8 +6,7 @@
 #include <json.hpp>
 #include <sstream>
 #include <functional>
-
-struct Player;
+#include <unordered_set>
 
 enum ColliderType {
     Solid,
@@ -27,12 +26,13 @@ enum CollisionDirection {
 struct Collider {
     ColliderType colliderType = ColliderType::Solid;
     CollisionDirection collisionDirection = CollisionDirection::All;
+    std::unordered_set<Collider*> isCollidingOrOverlappingWith;
     sf::RectangleShape rect;
-    std::vector<std::function<void(Player*)>> OverlapBeginCallbacks;
-    std::vector<std::function<void(Player*)>> OverlapEndCallbacks;
+    std::function<void(Collider*)> CollisionBeginCallback, CollisionEndCallback, 
+        TriggerOverlapBeginCallback, TriggerOverlapEndCallback;
     bool HasCollisionDirectionEnabled(CollisionDirection direction);
-    void ResolveCollisionAgainstPlayer(Player& player);
-    void ResolveTriggerOverlapAgainstPlayer(Player& player);
+    void InvokeInitialCallbackAgainstCollider(Collider* collider);
+    void InvokeEndCallbackAgainstCollider(Collider* collider);
 
     private:
     bool _overlappingPlayer;

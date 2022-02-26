@@ -5,7 +5,46 @@ bool Collider::HasCollisionDirectionEnabled(CollisionDirection direction) {
     return (direction | collisionDirection) == collisionDirection;
 }
 
-void Collider::ResolveTriggerOverlapAgainstPlayer(Player& player) {
+void Collider::InvokeInitialCallbackAgainstCollider(Collider* other) {
+    if(colliderType == ColliderType::Solid && other->colliderType == ColliderType::Solid) {
+        if(other->CollisionBeginCallback != nullptr) {
+            other->CollisionBeginCallback(this);
+        }
+        if(CollisionBeginCallback != nullptr) {
+            CollisionBeginCallback(other);
+        }
+    }
+    else {
+        // do the same for triggers
+        if(colliderType == ColliderType::Trigger && other->TriggerOverlapBeginCallback != nullptr) {
+            other->TriggerOverlapBeginCallback(this);
+        }
+        if(other->colliderType == ColliderType::Trigger && TriggerOverlapBeginCallback != nullptr) {
+            TriggerOverlapBeginCallback(other);
+        }
+    }
+}
+void Collider::InvokeEndCallbackAgainstCollider(Collider* other) {
+    if(colliderType == ColliderType::Solid && other->colliderType == ColliderType::Solid) {
+        if(other->CollisionEndCallback != nullptr) {
+            other->CollisionEndCallback(this);
+        }
+        if(CollisionEndCallback != nullptr) {
+            CollisionEndCallback(other);
+        }
+    }
+    else {
+        // do the same for triggers
+        if(colliderType == ColliderType::Trigger && other->TriggerOverlapEndCallback != nullptr) {
+            other->TriggerOverlapEndCallback(this);
+        }
+        if(other->colliderType == ColliderType::Trigger && TriggerOverlapEndCallback != nullptr) {
+            TriggerOverlapEndCallback(other);
+        }
+    }
+}
+
+/* void Collider::ResolveTriggerOverlapAgainstPlayer(Player& player) {
     if (colliderType == ColliderType::Solid) return;
 
     bool overlapping = rect.getGlobalBounds().intersects(
@@ -24,9 +63,9 @@ void Collider::ResolveTriggerOverlapAgainstPlayer(Player& player) {
             c(&player);
         }
     }
-}
+} */
 
-void Collider::ResolveCollisionAgainstPlayer(Player& player) {
+/* void Collider::ResolveCollisionAgainstPlayer(Player& player) {
     if (colliderType == ColliderType::Trigger) return;
 
     // Test collision for player
@@ -68,7 +107,7 @@ void Collider::ResolveCollisionAgainstPlayer(Player& player) {
         }
     }
 }
-
+ */
 std::vector<Collider> LoadCollidersFromConfig() {
     std::ifstream config("config/collision.json");
     std::stringstream configBuffer;

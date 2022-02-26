@@ -161,7 +161,7 @@ int main() {
         }
 
         for (size_t i = 0; i < colliders.size(); i++) {
-            colliders[i].ResolveCollisionAgainstPlayer(player);
+            //colliders[i].ResolveCollisionAgainstPlayer(player);
         }
 
         player.collisionRect.setPosition(player.getPosition());
@@ -170,7 +170,7 @@ int main() {
 
         for (size_t i = 0; i < hands.size(); i++) {
             hands[i].Update(deltaTime);
-            hands[i].grabTrigger.ResolveTriggerOverlapAgainstPlayer(player);
+            //hands[i].grabTrigger.ResolveTriggerOverlapAgainstPlayer(player);
         }
 
         window.setView(mainCamera);
