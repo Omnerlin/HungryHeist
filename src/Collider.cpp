@@ -6,39 +6,66 @@ bool Collider::HasCollisionDirectionEnabled(CollisionDirection direction) {
 }
 
 void Collider::InvokeInitialCallbackAgainstCollider(Collider* other) {
-    if(colliderType == ColliderType::Solid && other->colliderType == ColliderType::Solid) {
-        if(other->CollisionBeginCallback != nullptr) {
+    if (colliderType == ColliderType::Solid &&
+        other->colliderType == ColliderType::Solid) {
+        if (other->CollisionBeginCallback != nullptr) {
             other->CollisionBeginCallback(this);
         }
-        if(CollisionBeginCallback != nullptr) {
+        if (CollisionBeginCallback != nullptr) {
             CollisionBeginCallback(other);
         }
-    }
-    else {
+    } else {
         // do the same for triggers
-        if(colliderType == ColliderType::Trigger && other->TriggerOverlapBeginCallback != nullptr) {
+        if (colliderType == ColliderType::Trigger &&
+            other->TriggerOverlapBeginCallback != nullptr) {
             other->TriggerOverlapBeginCallback(this);
         }
-        if(other->colliderType == ColliderType::Trigger && TriggerOverlapBeginCallback != nullptr) {
+        if (other->colliderType == ColliderType::Trigger &&
+            TriggerOverlapBeginCallback != nullptr) {
             TriggerOverlapBeginCallback(other);
         }
     }
 }
-void Collider::InvokeEndCallbackAgainstCollider(Collider* other) {
-    if(colliderType == ColliderType::Solid && other->colliderType == ColliderType::Solid) {
-        if(other->CollisionEndCallback != nullptr) {
-            other->CollisionEndCallback(this);
+
+void Collider::InvokeStayCallbackAgainstCollider(Collider* other) {
+    if (colliderType == ColliderType::Solid &&
+        other->colliderType == ColliderType::Solid) {
+        if (other->CollisionStayCallback != nullptr) {
+            other->CollisionStayCallback(this);
         }
-        if(CollisionEndCallback != nullptr) {
-            CollisionEndCallback(other);
+        if (CollisionStayCallback != nullptr) {
+            CollisionStayCallback(other);
+        }
+    } else {
+        // do the same for triggers
+        if (colliderType == ColliderType::Trigger &&
+            other->TriggerOverlapStayCallback != nullptr) {
+            other->TriggerOverlapStayCallback(this);
+        }
+        if (other->colliderType == ColliderType::Trigger &&
+            TriggerOverlapStayCallback != nullptr) {
+            TriggerOverlapStayCallback(other);
         }
     }
-    else {
+}
+
+void Collider::InvokeEndCallbackAgainstCollider(Collider* other) {
+    if (colliderType == ColliderType::Solid &&
+        other->colliderType == ColliderType::Solid) {
+        if (other->CollisionEndCallback != nullptr) {
+            other->CollisionEndCallback(this);
+        }
+        if (CollisionEndCallback != nullptr) {
+            CollisionEndCallback(other);
+        }
+    } else {
         // do the same for triggers
-        if(colliderType == ColliderType::Trigger && other->TriggerOverlapEndCallback != nullptr) {
+        if (colliderType == ColliderType::Trigger &&
+            other->TriggerOverlapEndCallback != nullptr) {
             other->TriggerOverlapEndCallback(this);
         }
-        if(other->colliderType == ColliderType::Trigger && TriggerOverlapEndCallback != nullptr) {
+        if (other->colliderType == ColliderType::Trigger &&
+            TriggerOverlapEndCallback != nullptr) {
             TriggerOverlapEndCallback(other);
         }
     }

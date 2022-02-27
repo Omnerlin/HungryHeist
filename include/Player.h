@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Collider.h"
 
 struct Player : sf::Sprite {
     // Transform
@@ -23,9 +24,10 @@ struct Player : sf::Sprite {
     void AddVelocity(float x, float y);
     void UpdatePosition(float deltaTime);
     void LoadSettingsFromConfig();
+    void ResolveMovementCollision(Collider* other);
 
     // Collision
-    sf::RectangleShape collisionRect;
+    Collider collider;
 
     float GetWidth() {
         return getTexture()->getSize().x;

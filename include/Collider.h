@@ -28,10 +28,11 @@ struct Collider {
     CollisionDirection collisionDirection = CollisionDirection::All;
     std::unordered_set<Collider*> isCollidingOrOverlappingWith;
     sf::RectangleShape rect;
-    std::function<void(Collider*)> CollisionBeginCallback, CollisionEndCallback, 
-        TriggerOverlapBeginCallback, TriggerOverlapEndCallback;
+    std::function<void(Collider*)> CollisionBeginCallback, CollisionStayCallback, CollisionEndCallback, 
+        TriggerOverlapBeginCallback, TriggerOverlapStayCallback, TriggerOverlapEndCallback;
     bool HasCollisionDirectionEnabled(CollisionDirection direction);
     void InvokeInitialCallbackAgainstCollider(Collider* collider);
+    void InvokeStayCallbackAgainstCollider(Collider* collider);
     void InvokeEndCallbackAgainstCollider(Collider* collider);
 
     private:

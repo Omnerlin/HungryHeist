@@ -87,9 +87,6 @@ void Hand::Update(float deltaTime) {
             if(_timeSinceStateChange >= _speed) {
                 setPosition(_homePosition);
                 done = true;
-                // for(auto c : attackFinishedCallbacks) {
-                //     c();
-                // }
                 SetHandState(HandState::Waiting);
             } else {
                 setPosition(posX, posY);

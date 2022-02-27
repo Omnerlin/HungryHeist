@@ -9,6 +9,7 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <Physics.h>
 
 /*
 Hand Layout            --|---|---|---|--
@@ -35,8 +36,9 @@ void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
         hand.grabTrigger.rect.setOrigin(25,0);
         hand.setTexture(handTexture);
 //        hand.attackFinishedCallbacks.push_back([&](){PrintDone(1);});
-        hands.push_back(hand);
+        hands.emplace_back(hand);
         handToAttackWith = &hands[hands.size() - 1];
+        Physics::RegisterCollider(&handToAttackWith->grabTrigger);
     }
     handToAttackWith->setColor(handColor);
     handToAttackWith->Attack(direction, view, 0.75f, offset);
@@ -74,6 +76,10 @@ int main() {
     player.setTexture(playerTexture);
     player.setOrigin(player.getTexture()->getSize().x / 2,
                      player.getTexture()->getSize().y);
+    Physics::RegisterCollider(&player.collider);
+    player.collider.CollisionStayCallback = [&](Collider* col){player.ResolveMovementCollision(col);};
+    player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout << col << "HAND!" << std::endl;};
+    player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout << col << " UNHAND!" << std::endl;};
 
     // Background
     sf::RectangleShape background;
@@ -90,9 +96,13 @@ int main() {
     sf::Texture handTexture;
     handTexture.loadFromFile("assets/textures/Hand.png");
     std::vector<Hand> hands;
+    hands.reserve(50);
 
     ReadJson(player);
     auto colliders = LoadCollidersFromConfig();
+    for(auto& col : colliders) {
+        Physics::RegisterCollider(&col);
+    }
 
     while (window.isOpen()) {
         Input::ClearPressedKeys();
@@ -134,7 +144,13 @@ int main() {
         if (Input::KeyWasPressed(KeyCode::J)) {
             std::cout << "Reloading config file." << std::endl;
             ReadJson(player);
+            for(auto& col : colliders) {
+                Physics::DeregisterCollider(&col);
+            }
             colliders = LoadCollidersFromConfig();
+            for(auto& col : colliders) {
+                Physics::RegisterCollider(&col);
+            }
             std::cout << "Done." << std::endl;
         }
 
@@ -151,7 +167,7 @@ int main() {
         }
 
         player.UpdatePosition(deltaTime);
-        player.collisionRect.setPosition(player.getPosition());
+        player.collider.rect.setPosition(player.getPosition());
 
         player.grounded = false;
         if (player.getPosition().y >= player.floorOffset) {
@@ -160,22 +176,19 @@ int main() {
             player.grounded = true;
         }
 
-        for (size_t i = 0; i < colliders.size(); i++) {
-            //colliders[i].ResolveCollisionAgainstPlayer(player);
-        }
-
-        player.collisionRect.setPosition(player.getPosition());
-        player.collisionRect.setFillColor(player.grounded ? sf::Color::Green
+        player.collider.rect.setPosition(player.getPosition());
+        player.collider.rect.setFillColor(player.grounded ? sf::Color::Green
                                                           : sf::Color::Red);
 
         for (size_t i = 0; i < hands.size(); i++) {
             hands[i].Update(deltaTime);
-            //hands[i].grabTrigger.ResolveTriggerOverlapAgainstPlayer(player);
         }
+
+        Physics::CheckForCollisionsAndTriggerOverlaps();
 
         window.setView(mainCamera);
         window.draw(background);
-        // window.draw(player.collisionRect);
+        // window.draw(player.collider.rect);
         for (size_t i = 0; i < colliders.size(); i++) {
             window.draw(colliders[i].rect);
         }
