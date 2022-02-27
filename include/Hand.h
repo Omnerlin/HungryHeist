@@ -5,6 +5,11 @@
 
 enum HandSpawnDirection { FromLeft = 0, FromRight = 1, FromTop = 2, FromBottom = 3 };
 
+struct HandSpawnPosition {
+    HandSpawnDirection direction;
+    float offset;
+};
+
 struct Hand : sf::Sprite {
     static sf::Color SkinColors[];
     enum HandState { Waiting, Attacking, Retreating };

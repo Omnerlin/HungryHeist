@@ -14,7 +14,7 @@
 /*
 Hand Layout            --|---|---|---|--
                        |               |
---- = Wall             -               -
+--- = Wall             |               |
 | = Hand               |               |
                        --|---|---|---|--
 */
@@ -155,7 +155,7 @@ int main() {
         }
 
         if (Input::KeyWasPressed(KeyCode::H)) {
-            AttackWithAHand(hands, mainCamera, handTexture, (HandSpawnDirection)(distribution(generator)), 64, Hand::SkinColors[colorDistribution(generator)]);
+            AttackWithAHand(hands, mainCamera, handTexture, (HandSpawnDirection)(distribution(generator)), 128, Hand::SkinColors[colorDistribution(generator)]);
         }
 
         if (Input::KeyWasPressed(KeyCode::Escape)) {

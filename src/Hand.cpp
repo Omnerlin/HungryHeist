@@ -22,18 +22,18 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
             break;
         case HandSpawnDirection::FromTop:
             setRotation(180);
-            _homePosition = sf::Vector2f(0, -viewHalfSize.y * 2);
-            _targetPosition = sf::Vector2f(0, 0);
+            _homePosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
+            _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
             break;
         case HandSpawnDirection::FromRight:
             setRotation(270);
-            _homePosition = sf::Vector2f(viewHalfSize.x, -viewHalfSize.y);
-            _targetPosition = sf::Vector2f(-viewHalfSize.x, -viewHalfSize.y);
+            _homePosition = sf::Vector2f(viewHalfSize.x, -offset);
+            _targetPosition = sf::Vector2f(-viewHalfSize.x, -offset);
             break;
         case HandSpawnDirection::FromBottom:
             setRotation(0);
-            _homePosition = sf::Vector2f(0, 0);
-            _targetPosition = sf::Vector2f(0, -viewHalfSize.y * 2);
+            _homePosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
+            _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
             break;
     }
     setPosition(_homePosition);
