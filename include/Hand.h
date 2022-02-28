@@ -12,14 +12,17 @@ struct HandSpawnPosition {
 
 struct Hand : sf::Sprite {
     static sf::Color SkinColors[];
-    enum HandState { Waiting, Attacking, Retreating };
+    enum HandState { Waiting, Warning, Attacking, Retreating };
     Collider grabTrigger;
     void Attack(HandSpawnDirection from, sf::View view, float speed, float offset);
     void SetOpen(bool opened);
     bool IsOpen();
+    HandState GetHandState();
     void Update(float deltaTime);
     bool done {true};
     std::function<void()> HandFinishCallback;
+    sf::Sprite exclamationSprite;
+    float warningDuration = 0.5f;
 
    private:
     void SetHandState(HandState state);

@@ -73,6 +73,7 @@ int main() {
     background.setOrigin(background.getSize().x / 2,
                          background.getSize().y - 82);
 
+
     // Hands
     std::vector<HandSpawnPosition> _handPositions {
         // Bottom row
@@ -90,7 +91,9 @@ int main() {
     std::vector<HandSpawnPosition> inactiveHandPositions(_handPositions.size());
 
     sf::Texture handTexture;
+    sf::Texture exclamationTexture;
     handTexture.loadFromFile("assets/textures/Hand.png");
+    exclamationTexture.loadFromFile("assets/textures/Exclamation.png");
     std::vector<Hand> hands;
     hands.reserve(_handPositions.size());
     std::cout << "Number of hands: " << _handPositions.size();
@@ -101,6 +104,7 @@ int main() {
         hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75));
         hand.grabTrigger.rect.setOrigin(25,0);
         hand.setTexture(handTexture);
+        hand.exclamationSprite.setTexture(exclamationTexture);
         hands.push_back(hand);
         Physics::RegisterCollider(&hands[hands.size() - 1].grabTrigger);
     }
@@ -191,7 +195,6 @@ int main() {
 
             }
         }
-        
 
         player.UpdatePosition(deltaTime);
         player.collider.rect.setPosition(player.getPosition());
@@ -220,6 +223,11 @@ int main() {
         }
         for (size_t i = 0; i < hands.size(); i++) {
             window.draw(hands[i]);
+        }
+        for (size_t i = 0; i < hands.size(); i++) {
+            if(hands[i].GetHandState() == Hand::HandState::Warning) {
+                window.draw(hands[i].exclamationSprite);
+            }
         }
         window.draw(player);
         window.draw(performanceText);

@@ -19,25 +19,29 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
             setRotation(90);
             _homePosition = sf::Vector2f(-viewHalfSize.x, -offset);
             _targetPosition = sf::Vector2f(viewHalfSize.x, -offset);
+            exclamationSprite.setPosition(_homePosition.x, _homePosition.y);
             break;
         case HandSpawnDirection::FromTop:
             setRotation(180);
             _homePosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
             _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
+            exclamationSprite.setPosition(_homePosition.x, _homePosition.y);
             break;
         case HandSpawnDirection::FromRight:
             setRotation(270);
             _homePosition = sf::Vector2f(viewHalfSize.x, -offset);
             _targetPosition = sf::Vector2f(-viewHalfSize.x, -offset);
+            exclamationSprite.setPosition(_homePosition.x - 16, _homePosition.y);
             break;
         case HandSpawnDirection::FromBottom:
             setRotation(0);
             _homePosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
             _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
+            exclamationSprite.setPosition(_homePosition.x, _homePosition.y - 32);
             break;
     }
     setPosition(_homePosition);
-    SetHandState(HandState::Attacking);
+    SetHandState(HandState::Warning);
 }
 
 void Hand::SetHandState(HandState state) {
@@ -54,6 +58,10 @@ void Hand::SetOpen(bool open) {
     _open = open;
 }
 
+Hand::HandState Hand::GetHandState() {
+    return _currentState;
+}
+
 void Hand::Update(float deltaTime) {
     if (done) return;
     _timeSinceStateChange += deltaTime;
@@ -65,6 +73,12 @@ void Hand::Update(float deltaTime) {
             if (_timeSinceStateChange >= _returnDelay)
                 SetHandState(HandState::Retreating);
             break;
+
+        // Warning that it is going to attack
+        case HandState::Warning:
+            if (_timeSinceStateChange >= warningDuration)
+                SetHandState(HandState::Attacking);
+        break;
 
         // Move towards target
         case HandState::Attacking: 
