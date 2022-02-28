@@ -19,25 +19,25 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
             setRotation(90);
             _homePosition = sf::Vector2f(-viewHalfSize.x, -offset);
             _targetPosition = sf::Vector2f(viewHalfSize.x, -offset);
-            exclamationSprite.setPosition(_homePosition.x, _homePosition.y);
+            exclamationSprite.setPosition(_homePosition.x, _homePosition.y - 16);
             break;
         case HandSpawnDirection::FromTop:
             setRotation(180);
             _homePosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
             _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
-            exclamationSprite.setPosition(_homePosition.x, _homePosition.y);
+            exclamationSprite.setPosition(_homePosition.x - 8, _homePosition.y);
             break;
         case HandSpawnDirection::FromRight:
             setRotation(270);
             _homePosition = sf::Vector2f(viewHalfSize.x, -offset);
             _targetPosition = sf::Vector2f(-viewHalfSize.x, -offset);
-            exclamationSprite.setPosition(_homePosition.x - 16, _homePosition.y);
+            exclamationSprite.setPosition(_homePosition.x - 16, _homePosition.y - 16);
             break;
         case HandSpawnDirection::FromBottom:
             setRotation(0);
             _homePosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
             _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
-            exclamationSprite.setPosition(_homePosition.x, _homePosition.y - 32);
+            exclamationSprite.setPosition(_homePosition.x - 8, _homePosition.y - 32);
             break;
     }
     setPosition(_homePosition);
@@ -54,7 +54,7 @@ bool Hand::IsOpen() { return _open; }
 
 void Hand::SetOpen(bool open) {
     setTextureRect(
-        sf::IntRect(sf::Vector2i(open ? 64 : 0, 0), sf::Vector2i(64, 281)));
+        sf::IntRect(sf::Vector2i(open ? 64 : 0, 0), sf::Vector2i(64, 72)));
     _open = open;
 }
 

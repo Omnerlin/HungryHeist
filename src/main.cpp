@@ -4,12 +4,13 @@
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <Collider.h>
 #include <Hand.h>
+#include <Physics.h>
 #include <Player.h>
 #include <Utils.h>
-#include <random>
+
 #include <algorithm>
 #include <iostream>
-#include <Physics.h>
+#include <random>
 
 /*
 Hand Layout            --|---|---|---|--
@@ -19,7 +20,8 @@ Hand Layout            --|---|---|---|--
                        --|---|---|---|--
 */
 // void AttackWithAHand(Hand& hand, sf::View view,
-//                      const sf::Texture& handTexture, HandSpawnDirection direction, float offset, sf::Color handColor) {
+//                      const sf::Texture& handTexture, HandSpawnDirection
+//                      direction, float offset, sf::Color handColor) {
 //     hand.setColor(handColor);
 //     hand.Attack(direction, view, 0.75f, offset);
 // }
@@ -27,12 +29,15 @@ Hand Layout            --|---|---|---|--
 void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
 
 int main() {
+    float timeBetweenHands = 1.f;
+    float timeSinceLastHand = 0.f;
+
     // Create Window
     sf::Vector2f referenceResolution(
         256, 144);  // Reference Resolution for pixel art.
     sf::RenderWindow window(sf::VideoMode(1280, 720),
                             "Graphics");  // Window Size
-    //window.setVerticalSyncEnabled(true);
+    // window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
     sf::View mainCamera(
         sf::Vector2f(0.f, -referenceResolution.y / 2.f),
@@ -41,9 +46,9 @@ int main() {
     sf::Clock deltaClock;
 
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> sideDistribution(0,1);
-    std::uniform_int_distribution<int> topDistribution(2,3);
-    std::uniform_int_distribution<int> colorDistribution(0,4);
+    std::uniform_int_distribution<int> sideDistribution(0, 1);
+    std::uniform_int_distribution<int> topDistribution(2, 3);
+    std::uniform_int_distribution<int> colorDistribution(0, 4);
 
     sf::Text performanceText;
     performanceText.setCharacterSize(10);
@@ -58,9 +63,13 @@ int main() {
     player.setOrigin(player.getTexture()->getSize().x / 2,
                      player.getTexture()->getSize().y);
     Physics::RegisterCollider(&player.collider);
-    player.collider.CollisionStayCallback = [&](Collider* col){player.ResolveMovementCollision(col);};
-    //player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout << col << "HAND!" << std::endl;};
-    //player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout << col << " UNHAND!" << std::endl;};
+    player.collider.CollisionStayCallback = [&](Collider* col) {
+        player.ResolveMovementCollision(col);
+    };
+    // player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout
+    // << col << "HAND!" << std::endl;};
+    // player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout
+    // << col << " UNHAND!" << std::endl;};
 
     // Background
     sf::RectangleShape background;
@@ -73,9 +82,8 @@ int main() {
     background.setOrigin(background.getSize().x / 2,
                          background.getSize().y - 82);
 
-
     // Hands
-    std::vector<HandSpawnPosition> _handPositions {
+    std::vector<HandSpawnPosition> _handPositions{
         // Bottom row
         HandSpawnPosition{HandSpawnDirection::FromBottom, 32 - 8},
         HandSpawnPosition{HandSpawnDirection::FromBottom, 96 - 20},
@@ -97,23 +105,27 @@ int main() {
     std::vector<Hand> hands;
     hands.reserve(_handPositions.size());
     std::cout << "Number of hands: " << _handPositions.size();
-    for(size_t i = 0; i < _handPositions.size(); i++) {
+    for (size_t i = 0; i < _handPositions.size(); i++) {
         Hand hand;
         hand.setOrigin(32, 0);
         hand.grabTrigger.colliderType = ColliderType::Trigger;
         hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75));
-        hand.grabTrigger.rect.setOrigin(25,0);
+        hand.grabTrigger.rect.setOrigin(25, 0);
         hand.setTexture(handTexture);
         hand.exclamationSprite.setTexture(exclamationTexture);
+        hand.setScale(0.5f, 0.5f);
         hands.push_back(hand);
         Physics::RegisterCollider(&hands[hands.size() - 1].grabTrigger);
     }
 
     ReadJson(player);
     auto colliders = LoadCollidersFromConfig();
-    for(auto& col : colliders) {
+    for (auto& col : colliders) {
         Physics::RegisterCollider(&col);
     }
+
+    sf::Font font;
+    font.loadFromFile("assets/fonts/FiraCode.ttf");
 
     while (window.isOpen()) {
         Input::ClearPressedKeys();
@@ -127,12 +139,43 @@ int main() {
 
         sf::Time time = deltaClock.restart();
         float deltaTime = time.asSeconds();
-        window.clear();
-        sf::Font font;
-        font.loadFromFile("assets/fonts/FiraCode.ttf");
+        timeSinceLastHand += deltaTime;
+        if (timeSinceLastHand >= timeBetweenHands) {
+            timeSinceLastHand -= timeBetweenHands;
+            if (_handPositions.size() > 0) {
+                auto indexDistribution = std::uniform_int_distribution<int>(
+                    0, _handPositions.size() - 1);
+                int positionIndex = indexDistribution(generator);
+                int handIndex = 0;
+                for (size_t i = 0; i < hands.size(); i++) {
+                    if (hands[i].done) {
+                        handIndex = i;
+                        break;
+                    }
+                }
+
+                HandSpawnPosition spawnPosition = _handPositions[positionIndex];
+                _handPositions.erase(_handPositions.begin() + positionIndex);
+                Hand* handToAttackWith = &hands[handIndex];
+
+                handToAttackWith->HandFinishCallback = [&_handPositions,
+                                                        spawnPosition]() {
+                    _handPositions.push_back(spawnPosition);
+                };
+                handToAttackWith->setColor(
+                    Hand::SkinColors[colorDistribution(generator)]);
+                handToAttackWith->Attack(
+                    (HandSpawnDirection)(spawnPosition.direction < 2
+                                             ? sideDistribution(generator)
+                                             : topDistribution(generator)),
+                    mainCamera, 0.75f, spawnPosition.offset);
+            }
+        }
+
         performanceText.setFont(font);
         performanceText.setPosition(-100, -100);
-        performanceText.setString("Performance (ms): " + std::to_string(time.asMilliseconds()));
+        performanceText.setString("Performance (ms): " +
+                                  std::to_string(time.asMilliseconds()));
 
         // Held Keys
         player.running = false;
@@ -155,11 +198,11 @@ int main() {
         if (Input::KeyWasPressed(KeyCode::J)) {
             std::cout << "Reloading config file." << std::endl;
             ReadJson(player);
-            for(auto& col : colliders) {
+            for (auto& col : colliders) {
                 Physics::DeregisterCollider(&col);
             }
             colliders = LoadCollidersFromConfig();
-            for(auto& col : colliders) {
+            for (auto& col : colliders) {
                 Physics::RegisterCollider(&col);
             }
             std::cout << "Done." << std::endl;
@@ -172,28 +215,7 @@ int main() {
         if (Input::KeyWasPressed(KeyCode::Space) && player.grounded) {
             player.AddVelocity(0, -player.jumpForce);
         }
-        if(Input::KeyWasPressed(KeyCode::H)) {
-            if(_handPositions.size() > 0) {
-                auto indexDistribution = std::uniform_int_distribution<int>(0, _handPositions.size() - 1);
-                int positionIndex = indexDistribution(generator);
-                int handIndex = 0;
-                for(size_t i = 0; i < hands.size(); i++) {
-                    if(hands[i].done) {
-                        handIndex = i;
-                        break;
-                    }
-                }
-
-                HandSpawnPosition spawnPosition = _handPositions[positionIndex];
-                _handPositions.erase(_handPositions.begin() + positionIndex);
-                Hand* handToAttackWith = &hands[handIndex];
-
-                handToAttackWith->HandFinishCallback = [&_handPositions, spawnPosition](){_handPositions.push_back(spawnPosition);};
-                handToAttackWith->setColor(Hand::SkinColors[colorDistribution(generator)]);
-                handToAttackWith->Attack((HandSpawnDirection)(spawnPosition.direction < 2 ? sideDistribution(generator) : topDistribution(generator)), 
-                mainCamera, 0.75f, spawnPosition.offset);
-
-            }
+        if (Input::KeyWasPressed(KeyCode::H)) {
         }
 
         player.UpdatePosition(deltaTime);
@@ -216,6 +238,7 @@ int main() {
 
         Physics::CheckForCollisionsAndTriggerOverlaps();
 
+        window.clear();
         window.setView(mainCamera);
         window.draw(background);
         for (size_t i = 0; i < colliders.size(); i++) {
@@ -225,7 +248,7 @@ int main() {
             window.draw(hands[i]);
         }
         for (size_t i = 0; i < hands.size(); i++) {
-            if(hands[i].GetHandState() == Hand::HandState::Warning) {
+            if (hands[i].GetHandState() == Hand::HandState::Warning) {
                 window.draw(hands[i].exclamationSprite);
             }
         }
