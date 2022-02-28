@@ -18,31 +18,11 @@ Hand Layout            --|---|---|---|--
 | = Hand               |               |
                        --|---|---|---|--
 */
-void AttackWithAHand(std::vector<Hand>& hands, sf::View view,
-                     const sf::Texture& handTexture, HandSpawnDirection direction, float offset, sf::Color handColor) {
-    Hand* handToAttackWith = nullptr;
-    for (size_t i = 0; i < hands.size(); i++) {
-        if (hands[i].done) {
-            handToAttackWith = &hands[i];
-            break;
-        }
-    }
-    if (handToAttackWith == nullptr) {
-        std::cout << "Spawning a new hand" << std::endl;
-        Hand hand;
-        hand.setOrigin(32, 0);
-        hand.grabTrigger.colliderType = ColliderType::Trigger;
-        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75));
-        hand.grabTrigger.rect.setOrigin(25,0);
-        hand.setTexture(handTexture);
-//        hand.attackFinishedCallbacks.push_back([&](){PrintDone(1);});
-        hands.emplace_back(hand);
-        handToAttackWith = &hands[hands.size() - 1];
-        Physics::RegisterCollider(&handToAttackWith->grabTrigger);
-    }
-    handToAttackWith->setColor(handColor);
-    handToAttackWith->Attack(direction, view, 0.75f, offset);
-}
+// void AttackWithAHand(Hand& hand, sf::View view,
+//                      const sf::Texture& handTexture, HandSpawnDirection direction, float offset, sf::Color handColor) {
+//     hand.setColor(handColor);
+//     hand.Attack(direction, view, 0.75f, offset);
+// }
 
 void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
 
@@ -61,8 +41,9 @@ int main() {
     sf::Clock deltaClock;
 
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,4);
-    std::uniform_int_distribution<int> colorDistribution(0,5);
+    std::uniform_int_distribution<int> sideDistribution(0,1);
+    std::uniform_int_distribution<int> topDistribution(2,3);
+    std::uniform_int_distribution<int> colorDistribution(0,4);
 
     sf::Text performanceText;
     performanceText.setCharacterSize(10);
@@ -78,8 +59,8 @@ int main() {
                      player.getTexture()->getSize().y);
     Physics::RegisterCollider(&player.collider);
     player.collider.CollisionStayCallback = [&](Collider* col){player.ResolveMovementCollision(col);};
-    player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout << col << "HAND!" << std::endl;};
-    player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout << col << " UNHAND!" << std::endl;};
+    //player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout << col << "HAND!" << std::endl;};
+    //player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout << col << " UNHAND!" << std::endl;};
 
     // Background
     sf::RectangleShape background;
@@ -93,10 +74,36 @@ int main() {
                          background.getSize().y - 82);
 
     // Hands
+    std::vector<HandSpawnPosition> _handPositions {
+        // Bottom row
+        HandSpawnPosition{HandSpawnDirection::FromBottom, 32 - 8},
+        HandSpawnPosition{HandSpawnDirection::FromBottom, 96 - 20},
+        HandSpawnPosition{HandSpawnDirection::FromBottom, 160 - 32},
+        HandSpawnPosition{HandSpawnDirection::FromBottom, 224 - 44},
+        HandSpawnPosition{HandSpawnDirection::FromBottom, 288 - 56},
+        // Right Row
+        HandSpawnPosition{HandSpawnDirection::FromRight, 32 - 16},
+        HandSpawnPosition{HandSpawnDirection::FromRight, 96 - 24},
+        HandSpawnPosition{HandSpawnDirection::FromRight, 160 - 32},
+    };
+
+    std::vector<HandSpawnPosition> inactiveHandPositions(_handPositions.size());
+
     sf::Texture handTexture;
     handTexture.loadFromFile("assets/textures/Hand.png");
     std::vector<Hand> hands;
-    hands.reserve(50);
+    hands.reserve(_handPositions.size());
+    std::cout << "Number of hands: " << _handPositions.size();
+    for(size_t i = 0; i < _handPositions.size(); i++) {
+        Hand hand;
+        hand.setOrigin(32, 0);
+        hand.grabTrigger.colliderType = ColliderType::Trigger;
+        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75));
+        hand.grabTrigger.rect.setOrigin(25,0);
+        hand.setTexture(handTexture);
+        hands.push_back(hand);
+        Physics::RegisterCollider(&hands[hands.size() - 1].grabTrigger);
+    }
 
     ReadJson(player);
     auto colliders = LoadCollidersFromConfig();
@@ -154,10 +161,6 @@ int main() {
             std::cout << "Done." << std::endl;
         }
 
-        if (Input::KeyWasPressed(KeyCode::H)) {
-            AttackWithAHand(hands, mainCamera, handTexture, (HandSpawnDirection)(distribution(generator)), 128, Hand::SkinColors[colorDistribution(generator)]);
-        }
-
         if (Input::KeyWasPressed(KeyCode::Escape)) {
             std::cout << "Exiting..." << std::endl;
             window.close();
@@ -165,6 +168,30 @@ int main() {
         if (Input::KeyWasPressed(KeyCode::Space) && player.grounded) {
             player.AddVelocity(0, -player.jumpForce);
         }
+        if(Input::KeyWasPressed(KeyCode::H)) {
+            if(_handPositions.size() > 0) {
+                auto indexDistribution = std::uniform_int_distribution<int>(0, _handPositions.size() - 1);
+                int positionIndex = indexDistribution(generator);
+                int handIndex = 0;
+                for(size_t i = 0; i < hands.size(); i++) {
+                    if(hands[i].done) {
+                        handIndex = i;
+                        break;
+                    }
+                }
+
+                HandSpawnPosition spawnPosition = _handPositions[positionIndex];
+                _handPositions.erase(_handPositions.begin() + positionIndex);
+                Hand* handToAttackWith = &hands[handIndex];
+
+                handToAttackWith->HandFinishCallback = [&_handPositions, spawnPosition](){_handPositions.push_back(spawnPosition);};
+                handToAttackWith->setColor(Hand::SkinColors[colorDistribution(generator)]);
+                handToAttackWith->Attack((HandSpawnDirection)(spawnPosition.direction < 2 ? sideDistribution(generator) : topDistribution(generator)), 
+                mainCamera, 0.75f, spawnPosition.offset);
+
+            }
+        }
+        
 
         player.UpdatePosition(deltaTime);
         player.collider.rect.setPosition(player.getPosition());
@@ -188,13 +215,11 @@ int main() {
 
         window.setView(mainCamera);
         window.draw(background);
-        // window.draw(player.collider.rect);
         for (size_t i = 0; i < colliders.size(); i++) {
             window.draw(colliders[i].rect);
         }
         for (size_t i = 0; i < hands.size(); i++) {
             window.draw(hands[i]);
-            window.draw(hands[i].grabTrigger.rect);
         }
         window.draw(player);
         window.draw(performanceText);

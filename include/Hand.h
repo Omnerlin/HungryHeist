@@ -19,6 +19,7 @@ struct Hand : sf::Sprite {
     bool IsOpen();
     void Update(float deltaTime);
     bool done {true};
+    std::function<void()> HandFinishCallback;
 
    private:
     void SetHandState(HandState state);

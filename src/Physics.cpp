@@ -58,16 +58,13 @@ void Physics::CheckForCollisionsAndTriggerOverlaps() {
                     }
                 } else {
                     // If we were colliding but are now separated
-                    auto colItr = col.first->isCollidingOrOverlappingWith.find(
-                        colTemp.first);
+                    auto colItr = col.first->isCollidingOrOverlappingWith.find(colTemp.first);
                     if (colItr !=
                         col.first->isCollidingOrOverlappingWith.end()) {
                         // remove the things
                         col.first->isCollidingOrOverlappingWith.erase(colItr);
-                        colTemp.first->isCollidingOrOverlappingWith.erase(
-                            col.first);
-                        col.first->InvokeEndCallbackAgainstCollider(
-                            colTemp.first);
+                        colTemp.first->isCollidingOrOverlappingWith.erase(col.first);
+                        col.first->InvokeEndCallbackAgainstCollider(colTemp.first);
                     }
                 }
             }
