@@ -67,35 +67,34 @@ void Player::AddVelocity(const sf::Vector2f& addVelocity) {
 }
 
 void Player::ResolveMovementCollision(Collider* other) {
-    // Test collision for player{
+    // Test collision for player
+    sf::FloatRect bounds = other->rect.getGlobalBounds();
     if (other->HasCollisionDirectionEnabled(Bottom) && velocity.y < 0 &&
         prevPosition.y >
-            (other->rect.getPosition().y + other->rect.getSize().y +
-             collider.rect.getSize().y)) {
+            (bounds.top + bounds.height + collider.rect.getSize().y)) {
         // We hit the bottom
         velocity.y = 0;
-        setPosition(getPosition().x, other->rect.getPosition().y +
-                                         other->rect.getSize().y +
+        setPosition(getPosition().x, bounds.top + bounds.height +
                                          collider.rect.getSize().y);
     } else if (other->HasCollisionDirectionEnabled(Top) && velocity.y > 0 &&
-               prevPosition.y <= (other->rect.getPosition().y)) {
+               prevPosition.y <= (bounds.top)) {
         // We hit the top
         grounded = true;
         velocity.y = 0;
-        setPosition(getPosition().x, other->rect.getPosition().y);
+        setPosition(getPosition().x, bounds.top);
     } else if (other->HasCollisionDirectionEnabled(Left) && velocity.x > 0 &&
                (prevPosition.x + collider.rect.getSize().x / 2) <=
-                   other->rect.getPosition().x) {
+                   bounds.left) {
         // We hit the left side
         velocity.x = 0;
-        setPosition(other->rect.getPosition().x - collider.rect.getSize().x / 2,
+        setPosition(bounds.left - collider.rect.getSize().x / 2,
                     getPosition().y);
     } else if (other->HasCollisionDirectionEnabled(Right) && velocity.x < 0 &&
                (prevPosition.x - collider.rect.getSize().x / 2) >=
-                   other->rect.getPosition().x + other->rect.getSize().x) {
+                   bounds.left + bounds.width) {
         // We hit the right side
         velocity.x = 0;
-        setPosition(other->rect.getPosition().x + other->rect.getSize().x +
+        setPosition(bounds.left + bounds.width +
                         collider.rect.getSize().x / 2,
                     getPosition().y);
     }

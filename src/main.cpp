@@ -31,18 +31,29 @@ void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
 int main() {
     float timeBetweenHands = 1.f;
     float timeSinceLastHand = 0.f;
+    Collider* captureCollider;
 
     // Create Window
-    sf::Vector2f referenceResolution(
-        256, 144);  // Reference Resolution for pixel art.
+    sf::Vector2f referenceResolution(256, 144);  // Reference Resolution for pixel art.
+    sf::Vector2f guiResolution(1280, 720);       // Resolution for GUI layer
+
     sf::RenderWindow window(sf::VideoMode(1280, 720),
-                            "Graphics");  // Window Size
+                            "Janky Game");  // Window Size
     // window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
-    sf::View mainCamera(
-        sf::Vector2f(0.f, -referenceResolution.y / 2.f),
-        sf::Vector2f(referenceResolution.x, referenceResolution.y));
-    window.setView(mainCamera);
+    sf::View gameWorldCamera(sf::Vector2f(0.f, -referenceResolution.y / 2.f),
+                             sf::Vector2f(referenceResolution.x, referenceResolution.y));
+
+    // sf::RenderTexture gameRenderTexture;
+    // if (!gameRenderTexture.create(1280, 720)) {
+    //     std::cout << "ERROR: Could not create game render texture!" << std::endl;
+    // }
+    // sf::Texture gameTexture = gameRenderTexture.getTexture();
+    //::Sprite gameSprite(gameRenderTexture.getTexture());
+
+    // sf::View guiCamera(sf::Vector2f(guiResolution.x, guiResolution.y) / 2.f,
+    //                    sf::Vector2f(guiResolution.x, guiResolution.y));
+
     sf::Clock deltaClock;
 
     std::default_random_engine generator;
@@ -60,27 +71,23 @@ int main() {
     sf::Texture playerTexture;
     playerTexture.loadFromFile("assets/textures/Sphynx01.png");
     player.setTexture(playerTexture);
-    player.setOrigin(player.getTexture()->getSize().x / 2,
-                     player.getTexture()->getSize().y);
+    player.setOrigin(player.getTexture()->getSize().x / 2, player.getTexture()->getSize().y);
     Physics::RegisterCollider(&player.collider);
-    player.collider.CollisionStayCallback = [&](Collider* col) {
-        player.ResolveMovementCollision(col);
-    };
-    // player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout
-    // << col << "HAND!" << std::endl;};
-    // player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout
-    // << col << " UNHAND!" << std::endl;};
+    player.collider.CollisionStayCallback = [&](Collider* col) { player.ResolveMovementCollision(col); };
+    // player.collider.TriggerOverlapBeginCallback = [&captureCollider, &player](Collider* col) {
+    //     captureCollider = col;
+    //     player.captured = true;
+    //     // Physics::DeregisterCollider(&player.collider);
+    // };
 
     // Background
     sf::RectangleShape background;
     sf::Texture texture;
     texture.loadFromFile("assets/textures/kitchen2.png");
     background.setSize(sf::Vector2f(texture.getSize().x, texture.getSize().y));
-    background.setScale(background.getScale().x / 2,
-                        background.getScale().y / 2);
+    background.setScale(background.getScale().x / 2, background.getScale().y / 2);
     background.setTexture(&texture, true);
-    background.setOrigin(background.getSize().x / 2,
-                         background.getSize().y - 82);
+    background.setOrigin(background.getSize().x / 2, background.getSize().y - 82);
 
     // Hands
     std::vector<HandSpawnPosition> _handPositions{
@@ -109,11 +116,11 @@ int main() {
         Hand hand;
         hand.setOrigin(32, 0);
         hand.grabTrigger.colliderType = ColliderType::Trigger;
-        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75));
-        hand.grabTrigger.rect.setOrigin(25, 0);
         hand.setTexture(handTexture);
         hand.exclamationSprite.setTexture(exclamationTexture);
         hand.setScale(0.5f, 0.5f);
+        hand.grabTrigger.rect.setOrigin(sf::Vector2f(25, 0) * hand.getScale().x);
+        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75) * hand.getScale().x);
         hands.push_back(hand);
         Physics::RegisterCollider(&hands[hands.size() - 1].grabTrigger);
     }
@@ -143,8 +150,7 @@ int main() {
         if (timeSinceLastHand >= timeBetweenHands) {
             timeSinceLastHand -= timeBetweenHands;
             if (_handPositions.size() > 0) {
-                auto indexDistribution = std::uniform_int_distribution<int>(
-                    0, _handPositions.size() - 1);
+                auto indexDistribution = std::uniform_int_distribution<int>(0, _handPositions.size() - 1);
                 int positionIndex = indexDistribution(generator);
                 int handIndex = 0;
                 for (size_t i = 0; i < hands.size(); i++) {
@@ -158,39 +164,32 @@ int main() {
                 _handPositions.erase(_handPositions.begin() + positionIndex);
                 Hand* handToAttackWith = &hands[handIndex];
 
-                handToAttackWith->HandFinishCallback = [&_handPositions,
-                                                        spawnPosition]() {
+                handToAttackWith->HandFinishCallback = [&_handPositions, spawnPosition]() {
                     _handPositions.push_back(spawnPosition);
                 };
-                handToAttackWith->setColor(
-                    Hand::SkinColors[colorDistribution(generator)]);
-                handToAttackWith->Attack(
-                    (HandSpawnDirection)(spawnPosition.direction < 2
-                                             ? sideDistribution(generator)
-                                             : topDistribution(generator)),
-                    mainCamera, 0.75f, spawnPosition.offset);
+                handToAttackWith->setColor(Hand::SkinColors[colorDistribution(generator)]);
+                handToAttackWith->Attack((HandSpawnDirection)(spawnPosition.direction < 2 ? sideDistribution(generator)
+                                                                                          : topDistribution(generator)),
+                                         gameWorldCamera, 0.75f, spawnPosition.offset);
             }
         }
 
         performanceText.setFont(font);
         performanceText.setPosition(-100, -100);
-        performanceText.setString("Performance (ms): " +
-                                  std::to_string(time.asMilliseconds()));
+        performanceText.setString("Performance (ms): " + std::to_string(time.asMilliseconds()));
 
         // Held Keys
         player.running = false;
         if (Input::KeyIsDown(KeyCode::A)) {
             player.running = true;
             if (player.grounded && player.velocity.x > 0) player.velocity.x = 0;
-            player.AddVelocity(
-                -sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
+            player.AddVelocity(-sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
             player.facingLeft = false;
         }
         if (Input::KeyIsDown(KeyCode::D)) {
             if (player.grounded && player.velocity.x < 0) player.velocity.x = 0;
             player.running = true;
-            player.AddVelocity(
-                sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
+            player.AddVelocity(sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
             player.facingLeft = true;
         }
 
@@ -205,6 +204,8 @@ int main() {
             for (auto& col : colliders) {
                 Physics::RegisterCollider(&col);
             }
+            player.setPosition(0, 0);
+            player.captured = false;
             std::cout << "Done." << std::endl;
         }
 
@@ -218,8 +219,12 @@ int main() {
         if (Input::KeyWasPressed(KeyCode::H)) {
         }
 
-        player.UpdatePosition(deltaTime);
-        player.collider.rect.setPosition(player.getPosition());
+        if (!player.captured) {
+            player.UpdatePosition(deltaTime);
+            player.collider.rect.setPosition(player.getPosition());
+        } else {
+            player.setPosition(captureCollider->rect.getPosition());
+        }
 
         player.grounded = false;
         if (player.getPosition().y >= player.floorOffset) {
@@ -229,8 +234,7 @@ int main() {
         }
 
         player.collider.rect.setPosition(player.getPosition());
-        player.collider.rect.setFillColor(player.grounded ? sf::Color::Green
-                                                          : sf::Color::Red);
+        player.collider.rect.setFillColor(player.grounded ? sf::Color::Green : sf::Color::Red);
 
         for (size_t i = 0; i < hands.size(); i++) {
             hands[i].Update(deltaTime);
@@ -238,14 +242,17 @@ int main() {
 
         Physics::CheckForCollisionsAndTriggerOverlaps();
 
-        window.clear();
-        window.setView(mainCamera);
+        // Draw game world
+        window.clear(sf::Color::Transparent);
+        gameWorldCamera.setCenter(0,0);
+        window.setView(gameWorldCamera);
         window.draw(background);
         for (size_t i = 0; i < colliders.size(); i++) {
             window.draw(colliders[i].rect);
         }
         for (size_t i = 0; i < hands.size(); i++) {
             window.draw(hands[i]);
+            //window.draw(hands[i].grabTrigger.rect);
         }
         for (size_t i = 0; i < hands.size(); i++) {
             if (hands[i].GetHandState() == Hand::HandState::Warning) {
@@ -253,7 +260,29 @@ int main() {
             }
         }
         window.draw(player);
-        window.draw(performanceText);
+        window.display();
+        //sf::Sprite gameSprite = sf::Sprite(window.getTexture());
+
+        // Draw GUI
+        //window.clear();
+        //gameSprite.setPosition(250, 250);
+        //window.draw(gameSprite);
+        // window.setView(gameWorldCamera);
+        // window.draw(background);
+        // for (size_t i = 0; i < colliders.size(); i++) {
+        //     window.draw(colliders[i].rect);
+        // }
+        // for (size_t i = 0; i < hands.size(); i++) {
+        //     window.draw(hands[i]);
+        //     window.draw(hands[i].grabTrigger.rect);
+        // }
+        // for (size_t i = 0; i < hands.size(); i++) {
+        //     if (hands[i].GetHandState() == Hand::HandState::Warning) {
+        //         window.draw(hands[i].exclamationSprite);
+        //     }
+        // }
+        // window.draw(player);
+        // window.draw(performanceText);
         window.display();
     }
 

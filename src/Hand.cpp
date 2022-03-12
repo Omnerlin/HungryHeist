@@ -46,6 +46,23 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
 
 void Hand::SetHandState(HandState state) {
     _timeSinceStateChange = 0;
+    switch(state) {
+        case HandState::Attacking:
+            //grabTrigger.colliderType = ColliderType::Trigger;
+        break;
+
+        case HandState::Waiting:
+            setColor(sf::Color(125,125,125));
+            //grabTrigger.colliderType = ColliderType::Solid;
+        break;
+
+        case HandState::Retreating:
+            //grabTrigger.colliderType = ColliderType::Trigger;
+        break;
+
+        default:
+        break;
+    }
     _currentState = state;
     SetOpen(state == HandState::Attacking);
 }
@@ -71,7 +88,9 @@ void Hand::Update(float deltaTime) {
         // Pausing before retreat
         case HandState::Waiting:
             if (_timeSinceStateChange >= _returnDelay)
+            {
                 SetHandState(HandState::Retreating);
+            }
             break;
 
         // Warning that it is going to attack
@@ -81,7 +100,7 @@ void Hand::Update(float deltaTime) {
         break;
 
         // Move towards target
-        case HandState::Attacking: 
+        case HandState::Attacking:
             posX = lerp(_homePosition.x, _targetPosition.x, _timeSinceStateChange / _speed);
             posY = lerp(_homePosition.y, _targetPosition.y, _timeSinceStateChange / _speed);
 
@@ -95,10 +114,12 @@ void Hand::Update(float deltaTime) {
 
         // Move back to home
         case HandState::Retreating: 
-            posX = lerp(_targetPosition.x, _homePosition.x,  _timeSinceStateChange / _speed);
-            posY = lerp(_targetPosition.y, _homePosition.y, _timeSinceStateChange / _speed);
+            float colorA = lerp(255, 0, _timeSinceStateChange/_speed);
+            //posX = lerp(_targetPosition.x, _homePosition.x,  _timeSinceStateChange / _speed);
+            //posY = lerp(_targetPosition.y, _homePosition.y, _timeSinceStateChange / _speed);
 
             if(_timeSinceStateChange >= _speed) {
+                setColor(sf::Color::Transparent);
                 setPosition(_homePosition);
                 done = true;
                 if(HandFinishCallback != nullptr) {
@@ -106,7 +127,7 @@ void Hand::Update(float deltaTime) {
                 }
                 SetHandState(HandState::Waiting);
             } else {
-                setPosition(posX, posY);
+                setColor(sf::Color(getColor().r, getColor().g, getColor().b, colorA));
             }
             break;
     }

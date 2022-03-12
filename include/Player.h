@@ -17,6 +17,7 @@ struct Player : sf::Sprite {
     bool grounded;
     bool running;
     bool facingLeft;
+    bool captured {false};
     sf::Vector2f velocity;
     sf::Vector2f prevPosition;
     
