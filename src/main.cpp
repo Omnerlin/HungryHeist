@@ -35,36 +35,34 @@ int main() {
 
     // Create Window
     sf::Vector2f referenceResolution(256, 144);  // Reference Resolution for pixel art.
-    sf::Vector2f guiResolution(1280, 720);       // Resolution for GUI layer
-
     sf::RenderWindow window(sf::VideoMode(1280, 720),
-                            "Janky Game");  // Window Size
+                            "Graphics");  // Window Size
     // window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
-    sf::View gameWorldCamera(sf::Vector2f(0.f, -referenceResolution.y / 2.f),
-                             sf::Vector2f(referenceResolution.x, referenceResolution.y));
-
-    // sf::RenderTexture gameRenderTexture;
-    // if (!gameRenderTexture.create(1280, 720)) {
-    //     std::cout << "ERROR: Could not create game render texture!" << std::endl;
-    // }
-    // sf::Texture gameTexture = gameRenderTexture.getTexture();
-    //::Sprite gameSprite(gameRenderTexture.getTexture());
-
-    // sf::View guiCamera(sf::Vector2f(guiResolution.x, guiResolution.y) / 2.f,
-    //                    sf::Vector2f(guiResolution.x, guiResolution.y));
-
+    sf::View mainCamera(sf::Vector2f(0.f, -referenceResolution.y / 2.f),
+                        sf::Vector2f(referenceResolution.x, referenceResolution.y));
     sf::Clock deltaClock;
+
+    sf::RenderTexture gameRenderTexture;
+    if (!gameRenderTexture.create(1280, 720)) {
+        std::cout << "ERROR: Couldn't create game render texture!" << std::endl;
+    }
+    sf::Sprite gameSprite(gameRenderTexture.getTexture());
 
     std::default_random_engine generator;
     std::uniform_int_distribution<int> sideDistribution(0, 1);
     std::uniform_int_distribution<int> topDistribution(2, 3);
     std::uniform_int_distribution<int> colorDistribution(0, 4);
 
+    sf::Font font;
+    font.loadFromFile("assets/fonts/FiraCode.ttf");
+
     sf::Text performanceText;
-    performanceText.setCharacterSize(10);
+    performanceText.setFont(font);
+    performanceText.setCharacterSize(24);
     performanceText.setFillColor(sf::Color::Black);
     performanceText.setStyle(sf::Text::Bold);
+    performanceText.setPosition(100, 100);
 
     // Initialize Player
     Player player;
@@ -74,11 +72,17 @@ int main() {
     player.setOrigin(player.getTexture()->getSize().x / 2, player.getTexture()->getSize().y);
     Physics::RegisterCollider(&player.collider);
     player.collider.CollisionStayCallback = [&](Collider* col) { player.ResolveMovementCollision(col); };
-    // player.collider.TriggerOverlapBeginCallback = [&captureCollider, &player](Collider* col) {
-    //     captureCollider = col;
-    //     player.captured = true;
-    //     // Physics::DeregisterCollider(&player.collider);
-    // };
+    player.collider.TriggerOverlapBeginCallback = [&captureCollider, &player, &gameSprite](Collider* col) {
+        if(!player.captured) {
+            captureCollider = col;
+            player.captured = true;
+            gameSprite.setColor(sf::Color::Red);
+        }
+    };
+    // player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout
+    // << col << "HAND!" << std::endl;};
+    // player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout
+    // << col << " UNHAND!" << std::endl;};
 
     // Background
     sf::RectangleShape background;
@@ -116,11 +120,11 @@ int main() {
         Hand hand;
         hand.setOrigin(32, 0);
         hand.grabTrigger.colliderType = ColliderType::Trigger;
+        hand.setScale(0.5f, 0.5f);
+        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75) * hand.getScale().x);
+        hand.grabTrigger.rect.setOrigin(sf::Vector2f(25, 0) * hand.getScale().x);
         hand.setTexture(handTexture);
         hand.exclamationSprite.setTexture(exclamationTexture);
-        hand.setScale(0.5f, 0.5f);
-        hand.grabTrigger.rect.setOrigin(sf::Vector2f(25, 0) * hand.getScale().x);
-        hand.grabTrigger.rect.setSize(sf::Vector2f(50, 75) * hand.getScale().x);
         hands.push_back(hand);
         Physics::RegisterCollider(&hands[hands.size() - 1].grabTrigger);
     }
@@ -130,9 +134,6 @@ int main() {
     for (auto& col : colliders) {
         Physics::RegisterCollider(&col);
     }
-
-    sf::Font font;
-    font.loadFromFile("assets/fonts/FiraCode.ttf");
 
     while (window.isOpen()) {
         Input::ClearPressedKeys();
@@ -170,13 +171,9 @@ int main() {
                 handToAttackWith->setColor(Hand::SkinColors[colorDistribution(generator)]);
                 handToAttackWith->Attack((HandSpawnDirection)(spawnPosition.direction < 2 ? sideDistribution(generator)
                                                                                           : topDistribution(generator)),
-                                         gameWorldCamera, 0.75f, spawnPosition.offset);
+                                         mainCamera, 0.75f, spawnPosition.offset);
             }
         }
-
-        performanceText.setFont(font);
-        performanceText.setPosition(-100, -100);
-        performanceText.setString("Performance (ms): " + std::to_string(time.asMilliseconds()));
 
         // Held Keys
         player.running = false;
@@ -204,8 +201,9 @@ int main() {
             for (auto& col : colliders) {
                 Physics::RegisterCollider(&col);
             }
-            player.setPosition(0, 0);
             player.captured = false;
+            player.setPosition(0,0);
+            gameSprite.setColor(sf::Color::White);
             std::cout << "Done." << std::endl;
         }
 
@@ -226,6 +224,10 @@ int main() {
             player.setPosition(captureCollider->rect.getPosition());
         }
 
+        performanceText.setString("Performance (ms): " + std::to_string(time.asMilliseconds()));
+        // player.UpdatePosition(deltaTime);
+        player.collider.rect.setPosition(player.getPosition());
+
         player.grounded = false;
         if (player.getPosition().y >= player.floorOffset) {
             player.setPosition(player.getPosition().x, player.floorOffset);
@@ -242,47 +244,26 @@ int main() {
 
         Physics::CheckForCollisionsAndTriggerOverlaps();
 
-        // Draw game world
-        window.clear(sf::Color::Transparent);
-        gameWorldCamera.setCenter(0,0);
-        window.setView(gameWorldCamera);
-        window.draw(background);
+        gameRenderTexture.clear();
+        gameRenderTexture.setView(mainCamera);
+        gameRenderTexture.draw(background);
         for (size_t i = 0; i < colliders.size(); i++) {
-            window.draw(colliders[i].rect);
+            gameRenderTexture.draw(colliders[i].rect);
         }
         for (size_t i = 0; i < hands.size(); i++) {
-            window.draw(hands[i]);
-            //window.draw(hands[i].grabTrigger.rect);
+            gameRenderTexture.draw(hands[i]);
         }
         for (size_t i = 0; i < hands.size(); i++) {
             if (hands[i].GetHandState() == Hand::HandState::Warning) {
-                window.draw(hands[i].exclamationSprite);
+                gameRenderTexture.draw(hands[i].exclamationSprite);
             }
         }
-        window.draw(player);
-        window.display();
-        //sf::Sprite gameSprite = sf::Sprite(window.getTexture());
+        gameRenderTexture.draw(player);
+        gameRenderTexture.display();
 
-        // Draw GUI
-        //window.clear();
-        //gameSprite.setPosition(250, 250);
-        //window.draw(gameSprite);
-        // window.setView(gameWorldCamera);
-        // window.draw(background);
-        // for (size_t i = 0; i < colliders.size(); i++) {
-        //     window.draw(colliders[i].rect);
-        // }
-        // for (size_t i = 0; i < hands.size(); i++) {
-        //     window.draw(hands[i]);
-        //     window.draw(hands[i].grabTrigger.rect);
-        // }
-        // for (size_t i = 0; i < hands.size(); i++) {
-        //     if (hands[i].GetHandState() == Hand::HandState::Warning) {
-        //         window.draw(hands[i].exclamationSprite);
-        //     }
-        // }
-        // window.draw(player);
-        // window.draw(performanceText);
+        window.clear();
+        window.draw(gameSprite);
+        window.draw(performanceText);
         window.display();
     }
 
