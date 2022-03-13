@@ -79,10 +79,6 @@ int main() {
             gameSprite.setColor(sf::Color::Red);
         }
     };
-    // player.collider.TriggerOverlapBeginCallback = [](Collider* col){std::cout
-    // << col << "HAND!" << std::endl;};
-    // player.collider.TriggerOverlapEndCallback = [](Collider* col){ std::cout
-    // << col << " UNHAND!" << std::endl;};
 
     // Background
     sf::RectangleShape background;
@@ -244,6 +240,8 @@ int main() {
 
         Physics::CheckForCollisionsAndTriggerOverlaps();
 
+
+        // Draw game world to texture
         gameRenderTexture.clear();
         gameRenderTexture.setView(mainCamera);
         gameRenderTexture.draw(background);
@@ -261,6 +259,11 @@ int main() {
         gameRenderTexture.draw(player);
         gameRenderTexture.display();
 
+        // Draw gui to texture
+
+
+
+        // Render to window
         window.clear();
         window.draw(gameSprite);
         window.draw(performanceText);
