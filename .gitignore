@@ -6,6 +6,6 @@
 *.dll
 *.idb
 *.pdb
-*.vcxproj*
+*.vcxproj.*
 /Debug
 /x64

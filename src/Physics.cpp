@@ -35,7 +35,7 @@ void Physics::CheckForCollisionsAndTriggerOverlaps() {
     // Check all colliders against other colliders
     for (auto& col : colliders) {
         for (auto& colTemp : colliders) {
-            if (col.first == colTemp.first || colTemp.second == true) {
+            if (col.first == colTemp.first || colTemp.second == true || !col.first->enabled || !colTemp.first->enabled) {
                 continue;  // Don't compare a collider against itself or against
                            // colliders that have already run through the list.
             } else {

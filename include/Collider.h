@@ -34,6 +34,7 @@ struct Collider {
     void InvokeInitialCallbackAgainstCollider(Collider* collider);
     void InvokeStayCallbackAgainstCollider(Collider* collider);
     void InvokeEndCallbackAgainstCollider(Collider* collider);
+	bool enabled { true };
 
     private:
     bool _overlappingPlayer;

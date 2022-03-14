@@ -47,16 +47,22 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
 void Hand::SetHandState(HandState state) {
     _timeSinceStateChange = 0;
     switch(state) {
+	case HandState::Warning:
+		grabTrigger.enabled = false;
+		break;
         case HandState::Attacking:
+			grabTrigger.enabled = true;
             //grabTrigger.colliderType = ColliderType::Trigger;
         break;
 
         case HandState::Waiting:
+			grabTrigger.enabled = false;
             setColor(sf::Color(125,125,125));
             //grabTrigger.colliderType = ColliderType::Solid;
         break;
 
         case HandState::Retreating:
+			grabTrigger.enabled = false;
             //grabTrigger.colliderType = ColliderType::Trigger;
         break;
 

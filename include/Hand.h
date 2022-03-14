@@ -17,6 +17,7 @@ struct Hand : sf::Sprite {
     void Attack(HandSpawnDirection from, sf::View view, float speed, float offset);
     void SetOpen(bool opened);
     bool IsOpen();
+    void SetHandState(HandState state);
     HandState GetHandState();
     void Update(float deltaTime);
     bool done {true};
@@ -25,7 +26,6 @@ struct Hand : sf::Sprite {
     float warningDuration = 0.5f;
 
    private:
-    void SetHandState(HandState state);
     HandState _currentState;
     float _speed;
     sf::Vector2f _targetPosition;

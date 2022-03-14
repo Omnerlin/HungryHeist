@@ -12,6 +12,7 @@
 #include <iostream>
 #include <random>
 #include <filesystem>
+#include "GameEntity.h"
 
 
 /*
@@ -68,6 +69,9 @@ int main(int arc, char** argv) {
     performanceText.setStyle(sf::Text::Bold);
     performanceText.setPosition(100, 100);
 
+	std::vector<Hand> hands;
+
+
     // Initialize Player
     Player player;
     sf::Texture playerTexture;
@@ -76,11 +80,14 @@ int main(int arc, char** argv) {
     player.setOrigin(player.getTexture()->getSize().x / 2, player.getTexture()->getSize().y);
     Physics::RegisterCollider(&player.collider);
     player.collider.CollisionStayCallback = [&](Collider* col) { player.ResolveMovementCollision(col); };
-    player.collider.TriggerOverlapBeginCallback = [&captureCollider, &player, &gameSprite](Collider* col) {
+    player.collider.TriggerOverlapBeginCallback = [&captureCollider, &player, &gameSprite, &hands](Collider* col) {
         if(!player.captured) {
             captureCollider = col;
             player.captured = true;
             gameSprite.setColor(sf::Color::Red);
+			for(auto& hand : hands) {
+				hand.SetHandState(Hand::HandState::Retreating);
+			}
         }
     };
 
@@ -113,7 +120,6 @@ int main(int arc, char** argv) {
     sf::Texture exclamationTexture;
     handTexture.loadFromFile("assets/textures/Hand.png");
     exclamationTexture.loadFromFile("assets/textures/Exclamation.png");
-    std::vector<Hand> hands;
     hands.reserve(_handPositions.size());
     std::cout << "Number of hands: " << _handPositions.size();
     for (size_t i = 0; i < _handPositions.size(); i++) {
@@ -135,6 +141,22 @@ int main(int arc, char** argv) {
         Physics::RegisterCollider(&col);
     }
 
+	// Test some parent-child transform relationships
+	GameEntity rootRectTransform;
+	rootRectTransform.SetWorldPosition(sf::Vector2f(1280.f/2, 720.f/2));
+	sf::RectangleShape rootRectShape(sf::Vector2f(50,50));
+	float spinSpeed = 15.f;
+	float scaleRate = 2.f;
+	float totalRotation = 0.f;
+	float scaleMod = 1.f;
+
+	GameEntity childRect;
+	childRect.SetWorldPosition(sf::Vector2f(1280.f / 2, 720.f / 2 + 100));
+	childRect.SetParent(&rootRectTransform);
+	sf::RectangleShape childRectShape(sf::Vector2f(50, 50));
+	//rootRectTransform.children.push_back(&childRect);
+
+
     while (window.isOpen()) {
         Input::ClearPressedKeys();
         sf::Event event;
@@ -147,7 +169,9 @@ int main(int arc, char** argv) {
 
         sf::Time time = deltaClock.restart();
         float deltaTime = time.asSeconds();
-        timeSinceLastHand += deltaTime;
+		if (!player.captured) {
+			timeSinceLastHand += deltaTime;
+		}
         if (timeSinceLastHand >= timeBetweenHands) {
             timeSinceLastHand -= timeBetweenHands;
             if (_handPositions.size() > 0) {
@@ -189,6 +213,14 @@ int main(int arc, char** argv) {
             player.AddVelocity(sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
             player.facingLeft = true;
         }
+		if (Input::KeyIsDown(KeyCode::U)) {
+			scaleMod += deltaTime * scaleRate;
+			rootRectTransform.SetLocalScale(scaleMod, scaleMod);
+		}
+		if (Input::KeyIsDown(KeyCode::I)) {
+			scaleMod -= deltaTime * scaleRate;
+			rootRectTransform.SetLocalScale(scaleMod, scaleMod);
+		}
 
         // Pressed Keys
         if (Input::KeyWasPressed(KeyCode::J)) {
@@ -215,7 +247,25 @@ int main(int arc, char** argv) {
             player.AddVelocity(0, -player.jumpForce);
         }
         if (Input::KeyWasPressed(KeyCode::H)) {
+			childRect.SetParent(nullptr);
+			//childRect.SetWorldRotation(0);
         }
+		if (Input::KeyWasPressed(KeyCode::L)) {
+			//childRect.SetWorldPosition(sf::Vector2f(0,0));
+			childRect.SetParent(&rootRectTransform);
+		}
+
+		totalRotation += deltaTime * spinSpeed;
+		rootRectTransform.SetWorldRotation(totalRotation);
+
+		rootRectShape.setPosition(rootRectTransform._worldTransformable.getPosition());
+		rootRectShape.setRotation(rootRectTransform._worldTransformable.getRotation());
+		rootRectShape.setScale(rootRectTransform._worldTransformable.getScale());
+		childRectShape.setPosition(childRect._worldTransformable.getPosition());
+		childRectShape.setRotation(childRect._worldTransformable.getRotation());
+		childRectShape.setScale(childRect._worldTransformable.getScale());
+		//std::cout << childRect._worldTransformable.getRotation() << std::endl;
+
 
         if (!player.captured) {
             player.UpdatePosition(deltaTime);
@@ -271,6 +321,8 @@ int main(int arc, char** argv) {
         window.clear();
         window.draw(gameSprite);
         window.draw(performanceText);
+		window.draw(rootRectShape);
+		window.draw(childRectShape);
         window.display();
     }
 
