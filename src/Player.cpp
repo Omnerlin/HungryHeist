@@ -1,10 +1,16 @@
 #include <Player.h>
-#include <unistd.h>
-
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <json.hpp>
 #include <sstream>
+
+#ifdef _WIN32
+	#include <direct.h>
+#else
+	#include <unistd.h>
+#endif // _WIN32
+
 
 void Player::LoadSettingsFromConfig() {
     char tmp[256];

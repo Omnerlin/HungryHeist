@@ -1,4 +1,11 @@
+/.vs
 *.vscode
 /bin
-assets/Fonts/.DS_Store
-.DS_Store
+*.DS_Store
+*.obj
+*.dll
+*.idb
+*.pdb
+*.vcxproj*
+/Debug
+/x64
