@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <filesystem>
 
 
 /*
@@ -29,15 +30,17 @@ Hand Layout            --|---|---|---|--
 
 void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
 
-int main() {
+int main(int arc, char** argv) {
     float timeBetweenHands = 1.f;
     float timeSinceLastHand = 0.f;
     Collider* captureCollider;
 
+	auto dir = std::filesystem::path(argv[0]).parent_path();
+	std::cout << "EXE Path: " << dir.string() << std::endl;
+
     // Create Window
     sf::Vector2f referenceResolution(256, 144);  // Reference Resolution for pixel art.
-    sf::RenderWindow window(sf::VideoMode(1280, 720),
-                            "Graphics");  // Window Size
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "Graphics");  // Window Size
     // window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
     sf::View mainCamera(sf::Vector2f(0.f, -referenceResolution.y / 2.f),
