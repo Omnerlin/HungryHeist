@@ -12,7 +12,7 @@
 #include <iostream>
 #include <random>
 #include <filesystem>
-#include "GameEntity.h"
+#include "EntityTransform.h"
 
 
 /*
@@ -142,19 +142,26 @@ int main(int arc, char** argv) {
     }
 
 	// Test some parent-child transform relationships
-	GameEntity rootRectTransform;
+	EntityTransform rootRectTransform;
 	rootRectTransform.SetWorldPosition(sf::Vector2f(1280.f/2, 720.f/2));
 	sf::RectangleShape rootRectShape(sf::Vector2f(50,50));
+    rootRectTransform.SetAttachedTransformable(&rootRectShape);
 	float spinSpeed = 15.f;
 	float scaleRate = 2.f;
 	float totalRotation = 0.f;
 	float scaleMod = 1.f;
 
-	GameEntity childRect;
-	childRect.SetWorldPosition(sf::Vector2f(1280.f / 2, 720.f / 2 + 100));
+	EntityTransform childRect;
+	childRect.SetWorldPosition(sf::Vector2f(1280.f / 2, 720.f / 2 + 50));
 	childRect.SetParent(&rootRectTransform);
 	sf::RectangleShape childRectShape(sf::Vector2f(50, 50));
-	//rootRectTransform.children.push_back(&childRect);
+    childRect.SetAttachedTransformable(&childRectShape);
+
+    EntityTransform childchildRect;
+    childchildRect.SetWorldPosition(sf::Vector2f(1280.f / 2, 720.f / 2 + 100));
+    childchildRect.SetParent(&childRect);
+    sf::RectangleShape childchildRectShape(sf::Vector2f(50, 50));
+    childchildRect.SetAttachedTransformable(&childchildRectShape);
 
 
     while (window.isOpen()) {
@@ -257,14 +264,8 @@ int main(int arc, char** argv) {
 
 		totalRotation += deltaTime * spinSpeed;
 		rootRectTransform.SetWorldRotation(totalRotation);
-
-		rootRectShape.setPosition(rootRectTransform._worldTransformable.getPosition());
-		rootRectShape.setRotation(rootRectTransform._worldTransformable.getRotation());
-		rootRectShape.setScale(rootRectTransform._worldTransformable.getScale());
-		childRectShape.setPosition(childRect._worldTransformable.getPosition());
-		childRectShape.setRotation(childRect._worldTransformable.getRotation());
-		childRectShape.setScale(childRect._worldTransformable.getScale());
-		//std::cout << childRect._worldTransformable.getRotation() << std::endl;
+        childRect.LocateRotateBy(deltaTime * spinSpeed);
+        childchildRect.LocateRotateBy(deltaTime * spinSpeed);
 
 
         if (!player.captured) {
@@ -323,6 +324,7 @@ int main(int arc, char** argv) {
         window.draw(performanceText);
 		window.draw(rootRectShape);
 		window.draw(childRectShape);
+        window.draw(childchildRectShape);
         window.display();
     }
 
