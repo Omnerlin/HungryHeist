@@ -28,22 +28,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -122,26 +122,45 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\FoodItem.cpp" />
+    <ClCompile Include="include\Gui\GuiElement.cpp" />
     <ClCompile Include="src\Collider.cpp" />
+    <ClCompile Include="src\DrawnEntity.cpp" />
     <ClCompile Include="src\EntityTransform.cpp" />
+    <ClCompile Include="src\GuiText.cpp" />
+    <ClCompile Include="src\Gui\Gui.cpp" />
+    <ClCompile Include="src\Gui\GuiTransform.cpp" />
     <ClCompile Include="src\Hand.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Noise.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Animation.h" />
     <ClInclude Include="include\Collider.h" />
+    <ClInclude Include="include\DrawnEntity.h" />
     <ClInclude Include="include\EntityTransform.h" />
+    <ClInclude Include="include\FoodItem.h" />
+    <ClInclude Include="include\Gui\Gui.h" />
+    <ClInclude Include="include\Gui\GuiElement.h" />
+    <ClInclude Include="include\Gui\GuiText.h" />
+    <ClInclude Include="include\Gui\GuiTransform.h" />
     <ClInclude Include="include\Hand.h" />
     <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\json.hpp" />
+    <ClInclude Include="include\Noise.h" />
     <ClInclude Include="include\PerlinNoise.hpp" />
     <ClInclude Include="include\Physics.h" />
     <ClInclude Include="include\Player.h" />
+    <ClInclude Include="include\Tweener.h" />
     <ClInclude Include="include\Typedefs.h" />
     <ClInclude Include="include\Utils.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Graphics-sfml.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

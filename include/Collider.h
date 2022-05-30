@@ -1,5 +1,4 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include <json.hpp>
 #include <fstream>
 #include <iostream>
@@ -7,6 +6,7 @@
 #include <sstream>
 #include <functional>
 #include <unordered_set>
+#include <DrawnEntity.h>
 
 enum ColliderType {
     Solid,
@@ -23,21 +23,18 @@ enum CollisionDirection {
     All = Left|Right|Top|Bottom
 };
 
-struct Collider {
+struct Collider : DrawnEntity<sf::RectangleShape> {
     ColliderType colliderType = ColliderType::Solid;
     CollisionDirection collisionDirection = CollisionDirection::All;
     std::unordered_set<Collider*> isCollidingOrOverlappingWith;
-    sf::RectangleShape rect;
-    std::function<void(Collider*)> CollisionBeginCallback, CollisionStayCallback, CollisionEndCallback, 
+    std::vector<std::function<void(Collider*)>> CollisionBeginCallbacks, CollisionStayCallback, CollisionEndCallback, 
         TriggerOverlapBeginCallback, TriggerOverlapStayCallback, TriggerOverlapEndCallback;
     bool HasCollisionDirectionEnabled(CollisionDirection direction);
     void InvokeInitialCallbackAgainstCollider(Collider* collider);
     void InvokeStayCallbackAgainstCollider(Collider* collider);
     void InvokeEndCallbackAgainstCollider(Collider* collider);
+    void InvokeCallbacks(const std::vector<std::function<void(Collider*)>>& callbacks, Collider* arg);
 	bool enabled { true };
-
-    private:
-    bool _overlappingPlayer;
 };
 
 std::vector<Collider> LoadCollidersFromConfig();

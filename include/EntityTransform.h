@@ -1,20 +1,17 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <unordered_set>
+#include <set>
 
 struct EntityTransform {
 
 	// Position
 	void SetWorldPosition(const sf::Vector2f& position);
 	void SetWorldPosition(float x, float y);
-
 	void SetLocalPosition(const sf::Vector2f& position);
 	void SetLocalPosition(float x, float y);
-
 	const sf::Vector2f& GetWorldPosition();
 	const sf::Vector2f& GetLocalPosition();
-
 	void MoveWorld(const sf::Vector2f& moveAmount);
 	void MoveWorld(float x, float y);
 	void MoveLocal(const sf::Vector2f& moveAmount);
@@ -23,10 +20,8 @@ struct EntityTransform {
 	// Rotation
 	void SetLocalRotation(float rotation);
 	void SetWorldRotation(float rotation);
-
 	float GetLocalRotation();
 	float GetWorldRotation();
-
 	void WorldRotateBy(float degrees);
 	void LocateRotateBy(float degrees);
 
@@ -34,9 +29,19 @@ struct EntityTransform {
 	void SetLocalScale(const sf::Vector2f& scale);
 	void SetLocalScale(float x, float y);
 	void SetWorldScale(const sf::Vector2f& scale);
+	void SetWorldScale(float x, float y);
 	const sf::Vector2f& GetLossyScale();
 	const sf::Vector2f& GetLocalScale();
 	const sf::Vector2f& GetWorldScale();
+
+	// Origin
+	virtual void SetOrigin(const sf::Vector2f& origin);
+	void SetOrigin(float x, float y);
+	const sf::Vector2f& GetOrigin();
+
+	// Raw transforms
+	const sf::Transformable& GetWorldTransform();
+	const sf::Transformable& GetLocalTransform();
 
 	// Parent/child management
 	void SetParent(EntityTransform* newParent);
@@ -46,14 +51,31 @@ struct EntityTransform {
 	void RemoveAttachedTransform();
 
 	// Update this transform and its children
-	void UpdateTransforms();
+	virtual void UpdateTransforms();
+
+	// Helpers
+	struct SiblingComp {
+		bool operator()(EntityTransform* a, EntityTransform* b) const {
+			{
+				return (a != nullptr && b != nullptr) && (a->_siblingIndex > b->_siblingIndex);
+			}
+		}
+	};
+
+	EntityTransform* GetDeepestChild();
+	int GetSiblingIndex();
+	void SetSiblingIndex(int index);
+	void ForceUpdateChildIndicies();
+	std::set<EntityTransform*, SiblingComp>* const GetChildren();
+
 
 protected:
 	EntityTransform* _parent{ nullptr };
 	sf::Transformable* _attachedTransform{ nullptr };
-	std::unordered_set<EntityTransform*> _children;
+	std::set<EntityTransform*, SiblingComp> _children;
 
 private:
 	sf::Transformable _worldTransformable;
 	sf::Transformable _localTransformable;
+	int _siblingIndex;
 };

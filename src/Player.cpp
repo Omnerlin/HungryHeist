@@ -11,6 +11,11 @@
 #include <unistd.h>
 #endif // _WIN32
 
+enum class GameState {
+    Start,
+    Game,
+    End
+};
 
 void Player::LoadSettingsFromConfig() {
     char tmp[256];
@@ -25,9 +30,9 @@ void Player::LoadSettingsFromConfig() {
         json = nlohmann::json::parse(configBuffer.str());
         float collisionSizeX = json["playerCollisionSizeX"].get<float>();
         float collisionSizeY = json["playerCollisionSizeY"].get<float>();
-        collider.rect.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
-        collider.rect.setOrigin(collider.rect.getSize().x / 2,
-                                collider.rect.getSize().y);
+        collider.drawable.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
+        collider.transform.SetOrigin(collider.drawable.getSize().x / 2,
+                                collider.drawable.getSize().y);
         setOrigin(getTexture()->getSize().x / 2, getTexture()->getSize().y);
         groundAcceleration = json["playerGroundAcceleration"].get<float>();
         friction = json["playerFriction"].get<float>();
@@ -74,14 +79,14 @@ void Player::AddVelocity(const sf::Vector2f& addVelocity) {
 
 void Player::ResolveMovementCollision(Collider* other) {
     // Test collision for player
-    sf::FloatRect bounds = other->rect.getGlobalBounds();
+    sf::FloatRect bounds = other->drawable.getGlobalBounds();
     if (other->HasCollisionDirectionEnabled(Bottom) && velocity.y < 0 &&
         prevPosition.y >
-            (bounds.top + bounds.height + collider.rect.getSize().y)) {
+            (bounds.top + bounds.height + collider.drawable.getSize().y)) {
         // We hit the bottom
         velocity.y = 0;
         setPosition(getPosition().x, bounds.top + bounds.height +
-                                         collider.rect.getSize().y);
+                                         collider.drawable.getSize().y);
     } else if (other->HasCollisionDirectionEnabled(Top) && velocity.y > 0 &&
                prevPosition.y <= (bounds.top)) {
         // We hit the top
@@ -89,19 +94,19 @@ void Player::ResolveMovementCollision(Collider* other) {
         velocity.y = 0;
         setPosition(getPosition().x, bounds.top);
     } else if (other->HasCollisionDirectionEnabled(Left) && velocity.x > 0 &&
-               (prevPosition.x + collider.rect.getSize().x / 2) <=
+               (prevPosition.x + collider.drawable.getSize().x / 2) <=
                    bounds.left) {
         // We hit the left side
         velocity.x = 0;
-        setPosition(bounds.left - collider.rect.getSize().x / 2,
+        setPosition(bounds.left - collider.drawable.getSize().x / 2,
                     getPosition().y);
     } else if (other->HasCollisionDirectionEnabled(Right) && velocity.x < 0 &&
-               (prevPosition.x - collider.rect.getSize().x / 2) >=
+               (prevPosition.x - collider.drawable.getSize().x / 2) >=
                    bounds.left + bounds.width) {
         // We hit the right side
         velocity.x = 0;
         setPosition(bounds.left + bounds.width +
-                        collider.rect.getSize().x / 2,
+                        collider.drawable.getSize().x / 2,
                     getPosition().y);
     }
 }

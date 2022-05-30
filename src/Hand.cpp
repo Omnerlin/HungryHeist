@@ -9,6 +9,9 @@ sf::Color Hand::SkinColors[] {
     sf::Color(141, 85, 36),
 };
 
+siv::PerlinNoise::seed_type Hand::seed = 123456u;
+siv::PerlinNoise Hand::Noise = siv::PerlinNoise(Hand::seed);
+
 void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float offset) {
     done = false;
     _speed = speed;
@@ -16,31 +19,31 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
     sf::Vector2f viewHalfSize = view.getSize() / 2.f;
     switch (from) {
         case HandSpawnDirection::FromLeft:
-            setRotation(90);
+            transform.SetLocalRotation(90);
             _homePosition = sf::Vector2f(-viewHalfSize.x, -offset);
             _targetPosition = sf::Vector2f(viewHalfSize.x, -offset);
             exclamationSprite.setPosition(_homePosition.x, _homePosition.y - 16);
             break;
         case HandSpawnDirection::FromTop:
-            setRotation(180);
+            transform.SetLocalRotation(180);
             _homePosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
             _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
             exclamationSprite.setPosition(_homePosition.x - 8, _homePosition.y);
             break;
         case HandSpawnDirection::FromRight:
-            setRotation(270);
+            transform.SetLocalRotation(270);
             _homePosition = sf::Vector2f(viewHalfSize.x, -offset);
             _targetPosition = sf::Vector2f(-viewHalfSize.x, -offset);
             exclamationSprite.setPosition(_homePosition.x - 16, _homePosition.y - 16);
             break;
         case HandSpawnDirection::FromBottom:
-            setRotation(0);
+            transform.SetLocalRotation(0);
             _homePosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
             _targetPosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
             exclamationSprite.setPosition(_homePosition.x - 8, _homePosition.y - 32);
             break;
     }
-    setPosition(_homePosition);
+    transform.SetWorldPosition(_homePosition);
     SetHandState(HandState::Warning);
 }
 
@@ -57,7 +60,7 @@ void Hand::SetHandState(HandState state) {
 
         case HandState::Waiting:
 			grabTrigger.enabled = false;
-            setColor(sf::Color(125,125,125));
+            handSprite.setColor(sf::Color(125,125,125));
             //grabTrigger.colliderType = ColliderType::Solid;
         break;
 
@@ -76,7 +79,7 @@ void Hand::SetHandState(HandState state) {
 bool Hand::IsOpen() { return _open; }
 
 void Hand::SetOpen(bool open) {
-    setTextureRect(
+    handSprite.setTextureRect(
         sf::IntRect(sf::Vector2i(open ? 64 : 0, 0), sf::Vector2i(64, 72)));
     _open = open;
 }
@@ -93,10 +96,16 @@ void Hand::Update(float deltaTime) {
     switch (_currentState) {
         // Pausing before retreat
         case HandState::Waiting:
+        {
+            float intensity = 1.5f;
+            float noiseX = Noise.normalizedOctave1D(_timeSinceStateChange * 50, 1);
+            float noiseY = Noise.normalizedOctave1D(_timeSinceStateChange * 80, 1);
+            transform.SetWorldPosition(_targetPosition.x + noiseX * intensity, _targetPosition.y + noiseY * intensity);
             if (_timeSinceStateChange >= _returnDelay)
             {
                 SetHandState(HandState::Retreating);
             }
+        }
             break;
 
         // Warning that it is going to attack
@@ -107,36 +116,41 @@ void Hand::Update(float deltaTime) {
 
         // Move towards target
         case HandState::Attacking:
-            posX = lerp(_homePosition.x, _targetPosition.x, _timeSinceStateChange / _speed);
-            posY = lerp(_homePosition.y, _targetPosition.y, _timeSinceStateChange / _speed);
+            posX = Lerp(_homePosition.x, _targetPosition.x, _timeSinceStateChange / _speed);
+            posY = Lerp(_homePosition.y, _targetPosition.y, _timeSinceStateChange / _speed);
 
             if(_timeSinceStateChange >= _speed) {
-                setPosition(_targetPosition);
+                transform.SetWorldPosition(_targetPosition);
                 SetHandState(HandState::Waiting);
             } else {
-                setPosition(posX, posY);
+                transform.SetWorldPosition(posX, posY);
             }
             break;
 
         // Move back to home
         case HandState::Retreating: 
-            float colorA = lerp(255, 0, _timeSinceStateChange/_speed);
+            float colorA = Lerp(255, 0, _timeSinceStateChange/_speed);
             //posX = lerp(_targetPosition.x, _homePosition.x,  _timeSinceStateChange / _speed);
             //posY = lerp(_targetPosition.y, _homePosition.y, _timeSinceStateChange / _speed);
 
             if(_timeSinceStateChange >= _speed) {
-                setColor(sf::Color::Transparent);
-                setPosition(_homePosition);
+                handSprite.setColor(sf::Color::Transparent);
+                transform.SetWorldPosition(_homePosition);
                 done = true;
                 if(HandFinishCallback != nullptr) {
                     HandFinishCallback();
                 }
                 SetHandState(HandState::Waiting);
             } else {
-                setColor(sf::Color(getColor().r, getColor().g, getColor().b, colorA));
+                handSprite.setColor(sf::Color(handSprite.getColor().r, handSprite.getColor().g, handSprite.getColor().b, colorA));
             }
             break;
     }
-    grabTrigger.rect.setPosition(getPosition());
-    grabTrigger.rect.setRotation(getRotation());
+}
+
+void Hand::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+    target.draw(handSprite, states);
+    if (_currentState == HandState::Warning) {
+        target.draw(exclamationSprite, states);
+    }
 }

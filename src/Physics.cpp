@@ -35,13 +35,13 @@ void Physics::CheckForCollisionsAndTriggerOverlaps() {
     // Check all colliders against other colliders
     for (auto& col : colliders) {
         for (auto& colTemp : colliders) {
-            if (col.first == colTemp.first || colTemp.second == true || !col.first->enabled || !colTemp.first->enabled) {
+            if (col.first == colTemp.first || !col.first->enabled || !colTemp.first->enabled) {
                 continue;  // Don't compare a collider against itself or against
                            // colliders that have already run through the list.
             } else {
                 // Check for intersection
-                if (col.first->rect.getGlobalBounds().intersects(
-                        colTemp.first->rect.getGlobalBounds())) {
+                if (col.first->drawable.getGlobalBounds().intersects(
+                        colTemp.first->drawable.getGlobalBounds())) {
                     if (col.first->isCollidingOrOverlappingWith.find(
                             colTemp.first) ==
                         col.first->isCollidingOrOverlappingWith.end()) {
