@@ -4,6 +4,7 @@
 #include <set>
 
 struct EntityTransform {
+	virtual ~EntityTransform() = default;
 
 	// Position
 	void SetWorldPosition(const sf::Vector2f& position);

@@ -1,26 +1,58 @@
 #include "Gui/GuiElement.h"
+#include <iostream>
 
 void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(GetRectDrawable(), states);
 }
 
+void GuiElement::UpdateTransforms()
+{
+	GuiTransform::UpdateTransforms();
+	UpdateElementBasedOnTransform();
+}
+
 void GuiElement::HandleMouseDown()
 {
-	SetDebugColor(mouseDownColor);
+	SetColor(mouseDownColor);
 }
 
 void GuiElement::HandleMouseUp()
 {
-	SetDebugColor(hoverColor);
+	SetColor(hoverColor);
 }
 
 void GuiElement::HandleMouseEnter()
 {
-	SetDebugColor(hoverColor);
+	SetColor(hoverColor);
 }
 
 void GuiElement::HandleMouseExit()
 {
-	SetDebugColor(defaultColor);
+	SetColor(defaultColor);
+}
+
+void GuiElement::SetActiveHierarchy(bool active, bool shouldCaptureEvents)
+{
+	isActive = active;
+	captureEvents = shouldCaptureEvents;
+	if(!_children.empty())
+	{
+		for(auto child : _children)
+		{
+			dynamic_cast<GuiElement*>(child)->SetActiveHierarchy(active, shouldCaptureEvents);
+		}
+	}
+}
+
+void GuiElement::SetChildrenActive(bool active, bool shouldCaptureEvents)
+{
+	isActive = active;
+	if (!_children.empty())
+	{
+		for (auto child : _children)
+		{
+			dynamic_cast<GuiElement*>(child)->SetActiveHierarchy(active, shouldCaptureEvents);
+		}
+	}
 }

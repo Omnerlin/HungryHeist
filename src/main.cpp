@@ -15,6 +15,9 @@
 #include <filesystem>
 #include "EntityTransform.h"
 #include <Gui/Gui.h>
+#include <Gui/GuiText.h>
+#include <Gui/GuiButton.h>
+#include <Gui/GameGui.h>
 
 
 /*
@@ -32,6 +35,17 @@ Hand Layout            --|---|---|---|--
 // }
 
 void ReadJson(Player& player) { player.LoadSettingsFromConfig(); }
+
+
+//GameState gameState;
+//void SetGameState(GameState state)
+//{
+//	switch (state)
+//	{
+//		case GameState::Home:
+//			//
+//	}
+//}
 
 int main(int arc, char** argv) {
 	float timeBetweenHands = 1.f;
@@ -52,45 +66,25 @@ int main(int arc, char** argv) {
 	sf::Clock deltaClock;
 	sf::Clock clockSinceStart;
 
+	sf::Font debugFont;
+	debugFont.loadFromFile("assets/fonts/FiraCode.ttf");
+	sf::Font gameFont;
+	gameFont.loadFromFile("assets/fonts/LilitaOne.ttf");
+
 	// Gui
-	Gui gui;
+	GameGui gui;
 	GuiElement root_element;
-	root_element.SetDebugColor(sf::Color(255,255,255,50));
+	root_element.SetColor(sf::Color(255,255,255,0));
 	root_element.SetRectSize(guiCamera.getSize().x, guiCamera.getSize().y);
 	gui.root = &root_element;
+	gui.gameFont = gameFont;
+	gui.BuildMenus();
 
-	GuiElement redElement;
-	redElement.SetParent(&root_element);
-	redElement.SetDebugColor(sf::Color::Red);
-	redElement.SetRectSize(1280, 20, false);
-	redElement.SetAnchorMax(1, 0.0f);
-	redElement.SetLocalPosition(0, 0);
+	gui.QuitButton.onClick.emplace_back([&window]() {window.close(); });
+	gui.EndQuitButton.onClick.emplace_back([&window]() {window.close(); });
+	gui.PlayButton.onClick.emplace_back([&gui]() {gui.SetGuiState(GameGuiState::Play); });
+	gui.SetGuiState(Home);
 
-	GuiElement greenElement;
-	greenElement.SetParent(&root_element);
-	greenElement.SetDebugColor(sf::Color::Green);
-	greenElement.SetRectSize(300, 50);
-	greenElement.SetPivot({ 0.5f, 0.5f });
-	greenElement.SetAnchorMin(0.5f, 0.5f);
-	greenElement.SetAnchorMax(0.5f, 0.5f);
-	greenElement.SetLocalPosition(1280.f/2, 720.f/2);
-
-	GuiElement yellowElement;
-	yellowElement.SetParent(&greenElement);
-	yellowElement.SetDebugColor(sf::Color::Yellow);
-	yellowElement.SetRectSize(50, 25);
-	yellowElement.SetPivot({ 1, 0 });
-	yellowElement.SetAnchorMin(0, 0);
-	yellowElement.SetAnchorMax(1, 0.f);
-	yellowElement.SetLocalPosition(50, 25);
-
-	GuiElement blueElement;
-	blueElement.SetParent(&yellowElement);
-	blueElement.SetDebugColor(sf::Color::Blue);
-	blueElement.SetRectSize(10, 10);
-	blueElement.SetAnchorMin(0.5f, 0.5f);
-	blueElement.SetAnchorMax(0.5f, 0.5f);
-	blueElement.SetLocalPosition(20, 5);
 
 	// Other setup
 	sf::RenderTexture gameRenderTexture;
@@ -105,24 +99,12 @@ int main(int arc, char** argv) {
 	std::uniform_int_distribution<int> colorDistribution(0, 4);
 	std::uniform_int_distribution<int> foodItemDistribution(1, 7);
 
-	sf::Font debugFont;
-	debugFont.loadFromFile("assets/fonts/FiraCode.ttf");
-	sf::Font gameFont;
-	gameFont.loadFromFile("assets/fonts/LilitaOne.ttf");
-
 	sf::Text performanceText;
 	performanceText.setFont(debugFont);
 	performanceText.setCharacterSize(24);
 	performanceText.setFillColor(sf::Color::Black);
 	performanceText.setStyle(sf::Text::Bold);
 	performanceText.setPosition(100, 150);
-
-	sf::Text scoreText;
-	scoreText.setFont(gameFont);
-	scoreText.setCharacterSize(62);
-	scoreText.setFillColor(sf::Color::White);
-	scoreText.setPosition(50, 50);
-	scoreText.setString("Food Eaten: 0");
 
 	std::vector<Hand> hands;
 
@@ -155,15 +137,15 @@ int main(int arc, char** argv) {
 	player.setOrigin(player.getTexture()->getSize().x / 2, player.getTexture()->getSize().y);
 	Physics::RegisterCollider(&player.collider);
 	player.collider.CollisionStayCallback.push_back([&](Collider* col) { player.ResolveMovementCollision(col); });
-	player.collider.TriggerOverlapBeginCallback.push_back([&foodItem, &player, &foodItemDistribution, &generator, &scoreText, &foodScore](Collider* col) {
+	player.collider.TriggerOverlapBeginCallback.push_back([&foodItem, &player, &foodItemDistribution, &generator, &gui, &foodScore](Collider* col) {
 		if (col == &foodItem.collider) {
 			foodItem.AssignRandomType();
 			foodItem.transform.SetWorldPosition(-256.f / 2 + foodItemDistribution(generator) * 32, -16 + -foodItemDistribution(generator) * 16);
 			foodScore++;
-			scoreText.setString("Food Eaten: " + std::to_string(foodScore));
+			gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore));
 		}
 		});
-	player.collider.TriggerOverlapBeginCallback.push_back([&captureCollider, &player, &gameSprite, &hands, &foodItem](Collider* col) {
+	player.collider.TriggerOverlapBeginCallback.emplace_back([&captureCollider, &player, &gameSprite, &hands, &foodItem](Collider* col) {
 		if (!player.captured && col != &foodItem.collider) {
 			captureCollider = col;
 			player.captured = true;
@@ -263,7 +245,7 @@ int main(int arc, char** argv) {
 		}
 		if (timeSinceLastHand >= timeBetweenHands) {
 			timeSinceLastHand -= timeBetweenHands;
-			if (_handPositions.size() > 0) {
+			if (!_handPositions.empty()) {
 				auto indexDistribution = std::uniform_int_distribution<int>(0, _handPositions.size() - 1);
 				int positionIndex = indexDistribution(generator);
 				int handIndex = 0;
@@ -282,8 +264,9 @@ int main(int arc, char** argv) {
 					_handPositions.push_back(spawnPosition);
 				};
 				handToAttackWith->handSprite.setColor(Hand::SkinColors[colorDistribution(generator)]);
-				handToAttackWith->Attack((HandSpawnDirection)(static_cast<int>(spawnPosition.direction) < 2 ? sideDistribution(generator)
-					: topDistribution(generator)),
+				handToAttackWith->Attack(static_cast<HandSpawnDirection>(static_cast<int>(spawnPosition.direction) < 2
+					                                                         ? sideDistribution(generator)
+					                                                         : topDistribution(generator)),
 					mainCamera, 0.75f, spawnPosition.offset);
 			}
 		}
@@ -363,11 +346,13 @@ int main(int arc, char** argv) {
 		gameRenderTexture.clear();
 		gameRenderTexture.setView(mainCamera);
 		gameRenderTexture.draw(background);
-		for (size_t i = 0; i < colliders.size(); i++) {
-			gameRenderTexture.draw(colliders[i]);
+		for (const auto& collider : colliders)
+		{
+			gameRenderTexture.draw(collider);
 		}
-		for (size_t i = 0; i < hands.size(); i++) {
-			gameRenderTexture.draw(hands[i]);
+		for (const auto& hand : hands)
+		{
+			gameRenderTexture.draw(hand);
 		}
 		gameRenderTexture.draw(player);
 		gameRenderTexture.draw(foodItem);
@@ -379,7 +364,6 @@ int main(int arc, char** argv) {
 		gui.root->UpdateTransforms();
 		gui.UpdateHoveredElement();
 		window.draw(gui);
-		window.draw(scoreText);
 
 		window.setView(window.getDefaultView());
 		// Render to window

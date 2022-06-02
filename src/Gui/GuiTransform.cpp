@@ -3,6 +3,11 @@
 #include <iostream>
 
 
+GuiTransform::GuiTransform()
+{
+	rect.setFillColor(sf::Color::Transparent);
+}
+
 void GuiTransform::MarkDirty()
 {
 	_needsRebuild = true;
@@ -117,15 +122,15 @@ const sf::RectangleShape& GuiTransform::GetRectDrawable() const
 	return rect;
 }
 
-void GuiTransform::SetDebugColor(sf::Color color)
+void GuiTransform::SetColor(sf::Color color)
 {
 	rect.setFillColor(color);
-	rect.setOutlineThickness(-3);
-	rect.setOutlineColor(sf::Color::Black);
+	//rect.setOutlineThickness(-3);
+	//rect.setOutlineColor(sf::Color::Black);
 	debug_color = color;
 }
 
-const sf::Color GuiTransform::GetDebugColor()
+const sf::Color GuiTransform::GetDebugColor() const
 {
 	return debug_color;
 }
@@ -141,7 +146,7 @@ void GuiTransform::SetAnchoredPosition(float x, float y)
 	SetAnchoredPosition({ x, y });
 }
 
-void GuiTransform::SetAnchorMin(sf::Vector2f& anchorMin)
+void GuiTransform::SetAnchorMin(const sf::Vector2f& anchorMin)
 {
 	_anchorMin = anchorMin;
 }
@@ -151,12 +156,12 @@ void GuiTransform::SetAnchorMin(float x, float y)
 	SetAnchorMin(sf::Vector2f( x, y ));
 }
 
-const sf::Vector2f& GuiTransform::GetAnchorMin()
+const sf::Vector2f& GuiTransform::GetAnchorMin() const
 {
 	return _anchorMin;
 }
 
-void GuiTransform::SetAnchorMax(sf::Vector2f& anchorMax)
+void GuiTransform::SetAnchorMax(const sf::Vector2f& anchorMax)
 {
 	_anchorMax = anchorMax;
 }
@@ -166,12 +171,12 @@ void GuiTransform::SetAnchorMax(float x, float y)
 	SetAnchorMax(sf::Vector2f( x, y ));
 }
 
-const sf::Vector2f& GuiTransform::GetAnchorMax()
+const sf::Vector2f& GuiTransform::GetAnchorMax() const
 {
 	return _anchorMax;
 }
 
-const sf::Vector2f& GuiTransform::GetAnchoredPosition()
+const sf::Vector2f& GuiTransform::GetAnchoredPosition() const
 {
 	return _anchoredPosition;
 }
@@ -193,4 +198,12 @@ void GuiTransform::SetPivot(const sf::Vector2f& pivot)
 const sf::Vector2f& GuiTransform::GetPivot()
 {
 	return _pivot;
+}
+
+void GuiTransform::CopyAttributesFrom(GuiTransform& other)
+{
+	SetRectSize(other.GetRectSize());
+	SetPivot(other.GetPivot());
+	SetAnchorMin(other.GetAnchorMin());
+	SetAnchorMax(other.GetAnchorMax());
 }

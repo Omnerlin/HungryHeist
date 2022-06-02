@@ -3,16 +3,23 @@
 
 struct GuiElement : public sf::Drawable, public GuiTransform {
 	virtual void UpdateElementBasedOnTransform() {};
+	virtual void InitElement() {};
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+	virtual void UpdateTransforms() override;
 	virtual void HandleMouseDown();
 	virtual void HandleMouseUp();
 	virtual void HandleMouseEnter();
 	virtual void HandleMouseExit();
+	void SetActiveHierarchy(bool active, bool captureEvents);
 
-	bool _captureEvents{ false };
-	bool _isActive{ true };
+	void SetChildrenActive(bool active, bool shouldCaptureEvents);
+
+	bool captureEvents{ false };
+	bool isActive{ true };
 
 	sf::Color mouseDownColor = sf::Color::Red;
 	sf::Color hoverColor = sf::Color::Black;
 	sf::Color defaultColor = sf::Color::Cyan;
+
+
 };
