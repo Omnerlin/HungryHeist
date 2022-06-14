@@ -60,20 +60,10 @@ void ResetHands(std::vector<Hand>& hands)
 	}
 }
 
-
-//GameState gameState;
-//void SetGameState(GameState state)
-//{
-//	switch (state)
-//	{
-//		case GameState::Home:
-//			//
-//	}
-//}
-
 int main(int arc, char** argv) {
 	float timeBetweenHands = 1.f;
 	float timeSinceLastHand = 0.f;
+	float gameSaturation = 1.f;
 	Collider* captureCollider;
 	int foodScore = 0;
 	auto colliders = LoadCollidersFromConfig();
@@ -103,6 +93,10 @@ int main(int arc, char** argv) {
 	}
 	sf::Sprite gameSprite(gameRenderTexture.getTexture());
 
+	sf::Shader saturationShader;
+	saturationShader.loadFromFile("assets/shaders/saturation.frag", sf::Shader::Fragment);
+	saturationShader.setParameter("texture", sf::Shader::CurrentTexture);
+
 	std::default_random_engine generator;
 	std::uniform_int_distribution<int> sideDistribution(0, 1);
 	std::uniform_int_distribution<int> topDistribution(2, 3);
@@ -118,7 +112,6 @@ int main(int arc, char** argv) {
 
 	std::vector<Hand> hands;
 
-
 	// Gui
 	GameGui gui;
 	GuiElement root_element;
@@ -133,10 +126,10 @@ int main(int arc, char** argv) {
 	gui.QuitButton.onClick.emplace_back([&window]() {window.close(); });
 	gui.EndQuitButton.onClick.emplace_back([&window]() {window.close(); });
 	gui.PlayButton.onClick.emplace_back([&gui]() {gui.SetGuiState(GameGuiState::Play); });
-	gui.ReplayButton.onClick.emplace_back([&player, &colliders, &gameSprite, &gui, &foodScore, &hands]() {foodScore = 0; ReadJson(player, colliders);
-	gameSprite.setColor(sf::Color::White); ResetHands(hands); gui.SetGuiState(Play);  gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore)); });
-	gui.HomeButton.onClick.emplace_back([&player, &colliders, &gameSprite, &gui, &foodScore, &hands]() {foodScore = 0; ReadJson(player, colliders);
-	gameSprite.setColor(sf::Color::White); ResetHands(hands); gui.SetGuiState(Home); gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore)); });
+	gui.ReplayButton.onClick.emplace_back([&player, &colliders, &gameSprite, &gui, &foodScore, &hands, &gameSaturation]() {foodScore = 0; ReadJson(player, colliders);
+	gameSprite.setColor(sf::Color::White); ResetHands(hands); gui.SetGuiState(Play);  gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore)); gameSaturation = 1; });
+	gui.HomeButton.onClick.emplace_back([&player, &colliders, &gameSprite, &gui, &foodScore, &hands, &gameSaturation]() {foodScore = 0; ReadJson(player, colliders);
+	gameSprite.setColor(sf::Color::White); ResetHands(hands); gui.SetGuiState(Home); gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore));  gameSaturation = 1; });
 	gui.SetGuiState(Home);
 
 	// Create first food item
@@ -209,7 +202,7 @@ int main(int arc, char** argv) {
 			gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore));
 		}
 		});
-	player.collider.TriggerOverlapBeginCallback.emplace_back([&captureCollider, &player, &gameSprite, &hands, &foodItem, &gui](Collider* col) {
+	player.collider.TriggerOverlapBeginCallback.emplace_back([&captureCollider, &player, &gameSprite, &hands, &foodItem, &gui, &gameSaturation](Collider* col) {
 		if (!player.captured && col != &foodItem.collider) {
 			captureCollider = col;
 			player.captured = true;
@@ -218,6 +211,7 @@ int main(int arc, char** argv) {
 			player.transform.SetWorldRotation(col->transform.GetWorldRotation());
 			player.transform.SetLocalPosition(0, 28);
 			player.transform.SetLocalScale(1, 1);
+			gameSaturation = 0;
 
 			gameSprite.setColor(sf::Color::Red);
 			for (auto& hand : hands) {
@@ -446,7 +440,9 @@ int main(int arc, char** argv) {
 		gameRenderTexture.draw(foodItem);
 		// gameRenderTexture.draw(foodItem.collider);
 		gameRenderTexture.display();
-		window.draw(gameSprite);
+
+		saturationShader.setParameter("saturation", gameSaturation);
+		window.draw(gameSprite, &saturationShader);
 		window.setView(guiCamera);
 
 		gui.root->UpdateTransforms();
