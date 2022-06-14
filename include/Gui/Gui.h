@@ -14,7 +14,9 @@ public:
 	GuiElement* _clickedElement{ nullptr };
 
 	void ProcessEvent(sf::Event& event);
-	void UpdateHoveredElement();
+	//GuiElement* UpdateHoveredElement();
+	void UpdateHoveredElementNew();
+	GuiElement* UpdateHoveredElement(GuiElement* element);
 
 private:
 	void DrawElement(GuiElement* element, sf::RenderTarget& target, sf::RenderStates states) const;

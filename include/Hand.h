@@ -27,6 +27,7 @@ struct Hand : public sf::Drawable {
     std::function<void()> HandFinishCallback;
     float warningDuration = 0.5f;
     bool done {true};
+    bool capturedPlayer{ false };
 
     // Methods
     void Attack(HandSpawnDirection from, sf::View view, float speed, float offset);
@@ -46,5 +47,6 @@ struct Hand : public sf::Drawable {
     float _timeSinceStateChange;
     HandSpawnDirection _attackDirection;
     bool _open;
+    sf::Vector2f oldPosition;
 
 };

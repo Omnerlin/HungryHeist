@@ -33,7 +33,7 @@ void Player::LoadSettingsFromConfig() {
         collider.drawable.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
         collider.transform.SetOrigin(collider.drawable.getSize().x / 2,
                                 collider.drawable.getSize().y);
-        setOrigin(getTexture()->getSize().x / 2, getTexture()->getSize().y);
+        sprite.transform.SetOrigin(sprite.drawable.getTexture()->getSize().x / 2.f, sprite.drawable.getTexture()->getSize().y);
         groundAcceleration = json["playerGroundAcceleration"].get<float>();
         friction = json["playerFriction"].get<float>();
         maxSpeedX = json["playerMaxSpeedX"].get<float>();
@@ -49,7 +49,7 @@ void Player::LoadSettingsFromConfig() {
 }
 
 void Player::UpdatePosition(float deltaTime) {
-    sf::Vector2f currentPosition = getPosition();
+    sf::Vector2f currentPosition = transform.GetWorldPosition();
     prevPosition = currentPosition;
     AddVelocity(0, gravity * deltaTime);
     currentPosition += velocity * deltaTime;
@@ -68,8 +68,8 @@ void Player::UpdatePosition(float deltaTime) {
         }
     }
 
-    setScale(facingLeft ? -1 : 1, 1);
-    setPosition(currentPosition);
+    transform.SetWorldScale(facingLeft ? -1 : 1, 1);
+    transform.SetWorldPosition(currentPosition);
 }
 
 void Player::AddVelocity(const sf::Vector2f& addVelocity) {
@@ -85,29 +85,29 @@ void Player::ResolveMovementCollision(Collider* other) {
             (bounds.top + bounds.height + collider.drawable.getSize().y)) {
         // We hit the bottom
         velocity.y = 0;
-        setPosition(getPosition().x, bounds.top + bounds.height +
+        transform.SetWorldPosition(transform.GetWorldPosition().x, bounds.top + bounds.height +
                                          collider.drawable.getSize().y);
     } else if (other->HasCollisionDirectionEnabled(Top) && velocity.y > 0 &&
                prevPosition.y <= (bounds.top)) {
         // We hit the top
         grounded = true;
         velocity.y = 0;
-        setPosition(getPosition().x, bounds.top);
+        transform.SetWorldPosition(transform.GetWorldPosition().x, bounds.top);
     } else if (other->HasCollisionDirectionEnabled(Left) && velocity.x > 0 &&
                (prevPosition.x + collider.drawable.getSize().x / 2) <=
                    bounds.left) {
         // We hit the left side
         velocity.x = 0;
-        setPosition(bounds.left - collider.drawable.getSize().x / 2,
-                    getPosition().y);
+        transform.SetWorldPosition(bounds.left - collider.drawable.getSize().x / 2,
+                    transform.GetWorldPosition().y);
     } else if (other->HasCollisionDirectionEnabled(Right) && velocity.x < 0 &&
                (prevPosition.x - collider.drawable.getSize().x / 2) >=
                    bounds.left + bounds.width) {
         // We hit the right side
         velocity.x = 0;
-        setPosition(bounds.left + bounds.width +
+        transform.SetWorldPosition(bounds.left + bounds.width +
                         collider.drawable.getSize().x / 2,
-                    getPosition().y);
+                    transform.GetWorldPosition().y);
     }
 }
 

@@ -140,7 +140,7 @@
     <ClCompile Include="src\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Animation.h" />
+    <ClInclude Include="include\SpriteAnimation.h" />
     <ClInclude Include="include\Collider.h" />
     <ClInclude Include="include\DrawnEntity.h" />
     <ClInclude Include="include\EntityTransform.h" />
@@ -158,6 +158,7 @@
     <ClInclude Include="include\PerlinNoise.hpp" />
     <ClInclude Include="include\Physics.h" />
     <ClInclude Include="include\Player.h" />
+    <ClInclude Include="include\SpriteAnimator.h" />
     <ClInclude Include="include\Tweener.h" />
     <ClInclude Include="include\Typedefs.h" />
     <ClInclude Include="include\Utils.h" />

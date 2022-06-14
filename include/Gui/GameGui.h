@@ -14,6 +14,7 @@ enum GameGuiState
 struct GameGui : Gui
 {
 	void SetGuiState(GameGuiState state);
+	GameGuiState GetGuiState();
 	void BuildMenus();
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	sf::Font gameFont;
@@ -22,6 +23,7 @@ struct GameGui : Gui
 	GuiButton QuitButton;
 	GuiButton ReplayButton;
 	GuiButton EndQuitButton;
+	GuiButton HomeButton;
 	GUIText ScoreText;
 
 private:

@@ -8,6 +8,7 @@ struct DrawnEntity : sf::Drawable
 	T drawable;
 	EntityTransform transform;
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override; // Inherited via Drawable
+	~DrawnEntity() override = default;
 };
 
 

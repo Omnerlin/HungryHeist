@@ -28,34 +28,81 @@ void Gui::ProcessEvent(sf::Event& event)
 	}
 }
 
-void Gui::UpdateHoveredElement()
+void Gui::UpdateHoveredElementNew()
 {
-	EntityTransform* current = root->GetDeepestChild();
-	while (current->GetParent() != nullptr) {
+	GuiElement* element = UpdateHoveredElement(root);
 
-		auto children = current->GetParent()->GetChildren();
-		for (auto childItr = children->rbegin(); childItr != children->rend(); childItr++) {
-			GuiElement* test = dynamic_cast<GuiElement*>(*childItr);
-			if (current == nullptr) continue;
-			if (test->isActive && test->captureEvents && test->GetRectDrawable().getGlobalBounds().contains(_mousePosition)) {
-				if (_hoveredElement != test) {
-					if (_hoveredElement != nullptr) {
-						_hoveredElement->HandleMouseExit();
-						//_hoveredElement->SetDebugColor(sf::Color::Green);
-					}
-					test->HandleMouseEnter(); //SetDebugColor(sf::Color::Magenta);
-					_hoveredElement = test;
-				}
-				return;
+	if (element != _hoveredElement)
+	{
+		if (_hoveredElement != nullptr) {
+			_hoveredElement->HandleMouseExit();
+		}
+		if (element != nullptr)
+		{
+			element->HandleMouseEnter();
+		}
+		_hoveredElement = element;
+	}
+}
+
+//GuiElement* Gui::UpdateHoveredElement()
+//{
+//	EntityTransform* current = root->GetDeepestChild();
+//	while (current->GetParent() != nullptr) {
+//
+//		auto children = current->GetParent()->GetChildren();
+//		for (auto childItr = children->rbegin(); childItr != children->rend(); childItr++) {
+//			GuiElement* test = dynamic_cast<GuiElement*>(*childItr);
+//			if (current == nullptr) continue;
+//			if (test->isActive && test->captureEvents && test->GetRectDrawable().getGlobalBounds().contains(_mousePosition)) {
+//				if (_hoveredElement != test) {
+//					if (_hoveredElement != nullptr) {
+//						_hoveredElement->HandleMouseExit();
+//						//_hoveredElement->SetDebugColor(sf::Color::Green);
+//					}
+//					test->HandleMouseEnter(); //SetDebugColor(sf::Color::Magenta);
+//					_hoveredElement = test;
+//				}
+//				return test;
+//			}
+//		}
+//		current = current->GetParent();
+//	}
+//	if (_hoveredElement != nullptr) {
+//		_hoveredElement->HandleMouseExit();
+//	}
+//	_hoveredElement = nullptr;
+//	return nullptr;
+//}
+
+GuiElement* Gui::UpdateHoveredElement(GuiElement* element)
+{
+	GuiElement* result = nullptr;
+
+	if (!element->isActive) return nullptr;
+	auto children = element->GetChildren();
+	for (auto childItr = children->rbegin(); childItr != children->rend(); childItr++) {
+		GuiElement* test = dynamic_cast<GuiElement*>(*childItr);
+		if (test == nullptr) continue;
+		if (!test->GetChildren()->empty())
+		{
+			result = UpdateHoveredElement(test);
+			if (result != nullptr)
+			{
+				return result;
 			}
 		}
-		current = current->GetParent();
 	}
-	if (_hoveredElement != nullptr) {
-		_hoveredElement->HandleMouseExit();
-	}
-	_hoveredElement = nullptr;
 
+	if (result != nullptr)
+	{
+		return result;
+	}
+	if (element->isActive && element->captureEvents && element->GetRectDrawable().getGlobalBounds().contains(_mousePosition)) {
+		return element;
+	}
+
+	return nullptr;
 }
 
 void Gui::draw(sf::RenderTarget& target, sf::RenderStates states) const
