@@ -17,7 +17,8 @@ struct GameGui : Gui
 	GameGuiState GetGuiState();
 	void BuildMenus();
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
-	sf::Font gameFont;
+	void SetScore(int score);
+	sf::Font* gameFont;
 
 	GuiButton PlayButton;
 	GuiButton QuitButton;

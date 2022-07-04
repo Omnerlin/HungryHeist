@@ -122,6 +122,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Assets.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HandSpawner.cpp" />
     <ClCompile Include="include\FoodItem.cpp" />
     <ClCompile Include="include\Gui\GuiElement.cpp" />
     <ClCompile Include="src\Collider.cpp" />
@@ -140,6 +143,9 @@
     <ClCompile Include="src\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Assets.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="HandSpawner.h" />
     <ClInclude Include="include\SpriteAnimation.h" />
     <ClInclude Include="include\Collider.h" />
     <ClInclude Include="include\DrawnEntity.h" />

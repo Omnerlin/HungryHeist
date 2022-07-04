@@ -12,12 +12,11 @@ enum FoodType {
 };
 
 struct FoodItem : sf::Drawable {
-	static sf::Texture FoodTexture;
-	static sf::Texture GlowTexture;
 	EntityTransform transform;
 	DrawnEntity<sf::Sprite> foodSprite;
 	DrawnEntity<sf::Sprite> glowSprite;
 	Collider collider;
+	void Initialize();
 	void AssignRandomType();
 	void AssignType(FoodType type);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override; // Inherited via Drawable

@@ -25,13 +25,20 @@ struct Player {
 	sf::Vector2f velocity{ 0,0 };
 	sf::Vector2f prevPosition{ 0,0 };
 
+	void Initialize();
 	void AddVelocity(const sf::Vector2f& addVelocity);
 	void AddVelocity(float x, float y);
-	void UpdatePosition(float deltaTime);
+	void Update(float deltaTime);
+	void Update(float deltaTime);
 	void LoadSettingsFromConfig();
 	void ResolveMovementCollision(Collider* other);
 
 	SpriteAnimator animator;
+	SpriteAnimation idleAnim;
+	SpriteAnimation runAnim;
+	SpriteAnimation jumpAnim;
+	SpriteAnimation sadAnim;
+
 
 	// Collision
 	Collider collider;

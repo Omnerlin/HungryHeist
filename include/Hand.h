@@ -12,7 +12,7 @@ struct HandSpawnPosition {
     float offset;
 };
 
-struct Hand : public sf::Drawable {
+struct Hand : sf::Drawable {
 
     // Members
     static sf::Color SkinColors[];

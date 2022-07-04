@@ -48,8 +48,8 @@ GameGuiState GameGui::GetGuiState()
 void GameGui::BuildMenus()
 {
 	// ===== Build Home Menu =====
-	home.CopyAttributesFrom(*root);
-	home.SetParent(root);
+	home.CopyAttributesFrom(root);
+	home.SetParent(&root);
 	home.SetAnchorMin(0, 0);
 	home.SetAnchorMax(1, 1);
 
@@ -60,7 +60,7 @@ void GameGui::BuildMenus()
 	PlayButton.SetAnchorMin(0.4f, 0.5f);
 	PlayButton.SetAnchorMax(0.6f, 0.5f);
 	PlayButton.SetLocalPosition(1280.f / 2, 720.f * 0.45f);
-	PlayButton.text.text.setFont(gameFont);
+	PlayButton.text.text.setFont(*gameFont);
 	PlayButton.text.text.setString("PLAY");
 	PlayButton.captureEvents = true;
 	PlayButton.InitElement();
@@ -69,12 +69,12 @@ void GameGui::BuildMenus()
 	QuitButton.SetParent(&home);
 	QuitButton.CopyAttributesFrom(PlayButton);
 	QuitButton.SetLocalPosition(1280.f / 2, 720.f * 0.55f);
-	QuitButton.text.text.setFont(gameFont);
+	QuitButton.text.text.setFont(*gameFont);
 	QuitButton.text.text.setString("QUIT");
 	QuitButton.InitElement();
 
 	// ===== Build End Menu =====
-	end.SetParent(root);
+	end.SetParent(&root);
 	end.CopyAttributesFrom(home);
 
 
@@ -84,14 +84,14 @@ void GameGui::BuildMenus()
 	ReplayButton.SetAnchorMin(0.4f, 0.5f);
 	ReplayButton.SetAnchorMax(0.6f, 0.5f);
 	ReplayButton.SetLocalPosition(1280.f / 2, 720.f * 0.45f);
-	ReplayButton.text.text.setFont(gameFont);
+	ReplayButton.text.text.setFont(*gameFont);
 	ReplayButton.text.text.setString("REPLAY");
 	ReplayButton.InitElement();
 
 	HomeButton.SetParent(&end);
 	HomeButton.CopyAttributesFrom(ReplayButton);
 	HomeButton.SetLocalPosition(1280.f / 2, 720.f * 0.55f);
-	HomeButton.text.text.setFont(gameFont);
+	HomeButton.text.text.setFont(*gameFont);
 	HomeButton.text.text.setString("HOME");
 	HomeButton.InitElement();
 
@@ -99,13 +99,13 @@ void GameGui::BuildMenus()
 	EndQuitButton.SetParent(&end);
 	EndQuitButton.CopyAttributesFrom(PlayButton);
 	EndQuitButton.SetLocalPosition(1280.f / 2, 720.f * 0.65f);
-	EndQuitButton.text.text.setFont(gameFont);
+	EndQuitButton.text.text.setFont(*gameFont);
 	EndQuitButton.text.text.setString("QUIT");
 	EndQuitButton.InitElement();
 
-	ScoreText.SetParent(root);
+	ScoreText.SetParent(&root);
 	ScoreText.text.setFillColor(sf::Color::White);
-	ScoreText.text.setFont(gameFont);
+	ScoreText.text.setFont(*gameFont);
 	ScoreText.text.setString("Food Eaten: 0");
 	ScoreText.text.setCharacterSize(60);
 	ScoreText.SetLocalPosition(50, 25);
@@ -119,4 +119,9 @@ void GameGui::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	Gui::draw(target, states);
 
+}
+
+void GameGui::SetScore(int score)
+{
+	ScoreText.text.setString("Food Eaten: " + std::to_string(score));
 }
