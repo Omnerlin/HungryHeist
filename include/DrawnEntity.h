@@ -1,6 +1,6 @@
 #pragma once
 #include "EntityTransform.h"
-template <class T> 
+template <typename T>
 struct DrawnEntity : sf::Drawable
 {
 	DrawnEntity();

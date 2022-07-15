@@ -7,7 +7,7 @@
 struct Gui : sf::Drawable {
 
 public:
-	GuiElement root;
+	GuiElement* root;
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override; // Inherited from Drawable
 
 	GuiElement* _hoveredElement{ nullptr };

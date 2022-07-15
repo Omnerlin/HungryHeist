@@ -13,8 +13,8 @@
 #include <unistd.h>
 #endif // _WIN32
 #include "Input.h"
-#include "../Game.h"
-#include "../Assets.h"
+#include "Game.h"
+#include "Assets.h"
 
 void Player::LoadSettingsFromConfig() {
 	char tmp[256];
@@ -58,18 +58,24 @@ void Player::Update(float deltaTime) {
 		return;
 	}
 
-	// Held Keys
-	if (Input::KeyIsDown(KeyCode::A)) {
-		running = true;
-		if (grounded && velocity.x > 0) velocity.x = 0;
-		AddVelocity(-sf::Vector2f((deltaTime * groundAcceleration), 0.f));
-		facingLeft = false;
-	}
-	if (Input::KeyIsDown(KeyCode::D)) {
-		if (grounded && velocity.x < 0) velocity.x = 0;
-		running = true;
-		AddVelocity(sf::Vector2f((deltaTime * groundAcceleration), 0.f));
-		facingLeft = true;
+	if(inputEnabled)
+	{
+		// Held Keys
+		if (Input::KeyIsDown(KeyCode::A)) {
+			running = true;
+			if (grounded && velocity.x > 0) velocity.x = 0;
+			AddVelocity(-sf::Vector2f((deltaTime * groundAcceleration), 0.f));
+			facingLeft = false;
+		}
+		if (Input::KeyIsDown(KeyCode::D)) {
+			if (grounded && velocity.x < 0) velocity.x = 0;
+			running = true;
+			AddVelocity(sf::Vector2f((deltaTime * groundAcceleration), 0.f));
+			facingLeft = true;
+		}
+		if (Input::KeyWasPressed(KeyCode::Space) && grounded) {
+			AddVelocity(0, -jumpForce);
+		}
 	}
 
 	if (!grounded)
@@ -86,10 +92,6 @@ void Player::Update(float deltaTime) {
 		{
 			animator.SetState("Run");
 		}
-	}
-
-	if (Input::KeyWasPressed(KeyCode::Space) && grounded) {
-		AddVelocity(0, -jumpForce);
 	}
 
 	// Update current Position
@@ -164,6 +166,7 @@ void Player::Initialize()
 	sprite.transform.SetOrigin(32 / 2, sprite.drawable.getTexture()->getSize().y);
 	Physics::RegisterCollider(&collider);
 	collider.CollisionStayCallback.emplace_back([this](Collider* col) { ResolveMovementCollision(col); });
+	collider.transform.SetParent(&transform);
 }
 
 void Player::AddVelocity(const sf::Vector2f& addVelocity) {

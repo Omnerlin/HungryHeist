@@ -10,6 +10,7 @@ struct GuiElement : public sf::Drawable, public GuiTransform {
 	virtual void HandleMouseUp();
 	virtual void HandleMouseEnter();
 	virtual void HandleMouseExit();
+	virtual void HandleMouseDrag(float deltaX, float deltaY);
 	void SetActiveHierarchy(bool active, bool captureEvents);
 
 	void SetChildrenActive(bool active, bool shouldCaptureEvents);

@@ -45,36 +45,6 @@ void Gui::UpdateHoveredElementNew()
 	}
 }
 
-//GuiElement* Gui::UpdateHoveredElement()
-//{
-//	EntityTransform* current = root->GetDeepestChild();
-//	while (current->GetParent() != nullptr) {
-//
-//		auto children = current->GetParent()->GetChildren();
-//		for (auto childItr = children->rbegin(); childItr != children->rend(); childItr++) {
-//			GuiElement* test = dynamic_cast<GuiElement*>(*childItr);
-//			if (current == nullptr) continue;
-//			if (test->isActive && test->captureEvents && test->GetRectDrawable().getGlobalBounds().contains(_mousePosition)) {
-//				if (_hoveredElement != test) {
-//					if (_hoveredElement != nullptr) {
-//						_hoveredElement->HandleMouseExit();
-//						//_hoveredElement->SetDebugColor(sf::Color::Green);
-//					}
-//					test->HandleMouseEnter(); //SetDebugColor(sf::Color::Magenta);
-//					_hoveredElement = test;
-//				}
-//				return test;
-//			}
-//		}
-//		current = current->GetParent();
-//	}
-//	if (_hoveredElement != nullptr) {
-//		_hoveredElement->HandleMouseExit();
-//	}
-//	_hoveredElement = nullptr;
-//	return nullptr;
-//}
-
 GuiElement* Gui::UpdateHoveredElement(GuiElement* element)
 {
 	GuiElement* result = nullptr;
@@ -107,7 +77,6 @@ GuiElement* Gui::UpdateHoveredElement(GuiElement* element)
 
 void Gui::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	if (root == nullptr) return;
 	DrawElement(root, target, states);
 }
 

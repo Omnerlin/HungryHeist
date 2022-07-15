@@ -1,23 +1,10 @@
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
 
 #include <SFML/Graphics.hpp>
-#include <Collider.h>
-#include <Hand.h>
-#include <FoodItem.h>
-#include <Physics.h>
-#include <Player.h>
-#include <Utils.h>
+#include <Game.h>
 
-#include <algorithm>
-#include <iostream>
-#include <random>
-#include <filesystem>
-#include "EntityTransform.h"
-#include <Gui/Gui.h>
-#include <Gui/GuiText.h>
-#include <Gui/GuiButton.h>
-#include <Gui/GameGui.h>
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#include "Input.h"
+//#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
 
 /*
@@ -27,161 +14,16 @@ Hand Layout            --|---|---|---|--
 | = Hand               |               |
 					   --|---|---|---|--
 */
-// void AttackWithAHand(Hand& hand, sf::View view,
-//                      const sf::Texture& handTexture, HandSpawnDirection
-//                      direction, float offset, sf::Color handColor) {
-//     hand.setColor(handColor);
-//     hand.Attack(direction, view, 0.75f, offset);
-// }
-
-//void ReadJson(Player& player, std::vector<Collider>& colliders)
-//{
-//	std::cout << "Reloading config file." << std::endl;
-//	player.transform.SetParent(nullptr);
-//	player.transform.SetLocalRotation(0);
-//	player.LoadSettingsFromConfig();
-//	for (auto& col : colliders) {
-//		Physics::DeregisterCollider(&col);
-//	}
-//	colliders = LoadCollidersFromConfig();
-//	for (auto& col : colliders) {
-//		Physics::RegisterCollider(&col);
-//	}
-//	player.captured = false;
-//	player.transform.SetWorldPosition(0, 0);
-//}
-
-//void ResetHands(std::vector<Hand>& hands)
-//{
-//	for(auto& hand : hands)
-//	{
-//		hand.capturedPlayer = false;
-//		hand.SetHandState(Hand::Retreating);
-//	}
-//}
 
 int main(int arc, char** argv) {
-	//float timeBetweenHands = 1.f;
-	//float timeSinceLastHand = 0.f;
-	//float gameSaturation = 1.f;
-	//Collider* captureCollider;
-	//int foodScore = 0;
-	//auto colliders = LoadCollidersFromConfig();
-
-	//auto dir = std::filesystem::path(argv[0]).parent_path();
-	//std::cout << "EXE Path: " << dir.string() << std::endl;
-
 	// Create Window
-	//sf::Vector2f referenceResolution(256, 144);  // Reference Resolution for pixel art.
-	//sf::RenderWindow window(sf::VideoMode(1280, 720), "Janky Game");  // Window Size
-	//window.setFramerateLimit(165);
-	//sf::View mainCamera(sf::Vector2f(0.f, -referenceResolution.y / 2.f),
-	//	sf::Vector2f(referenceResolution.x, referenceResolution.y));
-	//sf::View guiCamera = window.getDefaultView();
-	//sf::Clock deltaClock;
-	//sf::Clock clockSinceStart;
+	sf::RenderWindow window;  // Window Size
+	Game game(&window);
+	game.Initialize();
 
 	sf::Image icon;
 	icon.loadFromFile("assets/textures/SphynxIcon.png");
 	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
-	//sf::Font debugFont;
-	//debugFont.loadFromFile("assets/fonts/FiraCode.ttf");
-	//Player player;
-
-	//sf::Shader saturationShader;
-	//saturationShader.loadFromFile("assets/shaders/saturation.frag", sf::Shader::Fragment);
-	//saturationShader.setParameter("texture", sf::Shader::CurrentTexture);
-
-	//std::default_random_engine generator;
-	//std::uniform_int_distribution<int> sideDistribution(0, 1);
-	//std::uniform_int_distribution<int> topDistribution(2, 3);
-	//std::uniform_int_distribution<int> colorDistribution(0, 4);
-	//std::uniform_int_distribution<int> foodItemDistribution(1, 7);
-
-	//sf::Text performanceText;
-	//performanceText.setFont(debugFont);
-	//performanceText.setCharacterSize(24);
-	//performanceText.setFillColor(sf::Color::Black);
-	//performanceText.setStyle(sf::Text::Bold);
-	//performanceText.setPosition(100, 150);
-
-	//std::vector<Hand> hands;
-
-	// Gui
-	//GameGui gui;
-	//sf::Font gameFont;
-	//gameFont.loadFromFile("assets/fonts/LilitaOne.ttf");
-	//GuiElement root_element;
-	//root_element.SetColor(sf::Color(255, 255, 255, 0));
-	//root_element.SetRectSize(guiCamera.getSize().x, guiCamera.getSize().y);
-	//gui.root = root_element;
-	//gui.gameFont = gameFont;
-	//gui.BuildMenus();
-
-	//gui.QuitButton.onClick.emplace_back([&window]() {window.close(); });
-	//gui.EndQuitButton.onClick.emplace_back([&window]() {window.close(); });
-	//gui.PlayButton.onClick.emplace_back([&gui]() {gui.SetGuiState(GameGuiState::Play); });
-	//gui.ReplayButton.onClick.emplace_back([&player, &colliders, &gameSprite, &gui, &foodScore, &hands, &gameSaturation]() {foodScore = 0; ReadJson(player, colliders);
-	//gameSprite.setColor(sf::Color::White); ResetHands(hands); gui.SetGuiState(Play);  gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore)); gameSaturation = 1; });
-	//gui.HomeButton.onClick.emplace_back([&player, &colliders, &gameSprite, &gui, &foodScore, &hands, &gameSaturation]() {foodScore = 0; ReadJson(player, colliders);
-	//gameSprite.setColor(sf::Color::White); ResetHands(hands); gui.SetGuiState(Home); gui.ScoreText.text.setString("Food Eaten: " + std::to_string(foodScore));  gameSaturation = 1; });
-	//gui.SetGuiState(Home);
-
-	//// Initialize Player
-
-
-	//// Background
-	//sf::RectangleShape background;
-	//texture.loadFromFile("assets/textures/kitchen2.png");
-	//background.setSize(sf::Vector2f(texture.getSize().x, texture.getSize().y));
-	//background.setScale(background.getScale().x / 2, background.getScale().y / 2);
-	//background.setTexture(&texture, true);
-	//background.setOrigin(background.getSize().x / 2, background.getSize().y - 82);
-
-	//// Hands
-	//std::vector<HandSpawnPosition> _handPositions {
-	//	// Bottom row
-	//	HandSpawnPosition{HandSpawnDirection::FromBottom, 32 - 8},
-	//	HandSpawnPosition{HandSpawnDirection::FromBottom, 96 - 20},
-	//	HandSpawnPosition{HandSpawnDirection::FromBottom, 160 - 32},
-	//	HandSpawnPosition{HandSpawnDirection::FromBottom, 224 - 44},
-	//	HandSpawnPosition{HandSpawnDirection::FromBottom, 288 - 56},
-	//	// Right Row
-	//	HandSpawnPosition{HandSpawnDirection::FromRight, 32 - 16},
-	//	HandSpawnPosition{HandSpawnDirection::FromRight, 96 - 24},
-	//	HandSpawnPosition{HandSpawnDirection::FromRight, 160 - 32},
-	//};
-
-	//std::vector<HandSpawnPosition> inactiveHandPositions(_handPositions.size());
-
-	//sf::Texture handTexture;
-	//sf::Texture exclamationTexture;
-	//handTexture.loadFromFile("assets/textures/Hand.png");
-	//exclamationTexture.loadFromFile("assets/textures/Exclamation.png");
-	//hands.reserve(_handPositions.size());
-	//std::cout << "Number of hands: " << _handPositions.size();
-	//for (size_t i = 0; i < _handPositions.size(); i++) {
-	//	Hand hand;
-	//	hands.push_back(hand);
-	//	Hand& newHand = hands[hands.size() - 1];
-	//	newHand.grabTrigger.colliderType = ColliderType::Trigger;
-	//	newHand.transform.SetWorldScale(0.5f, 0.5f);
-	//	newHand.grabTrigger.drawable.setSize(sf::Vector2f(50, 75) * newHand.transform.GetWorldScale().x);
-	//	newHand.handSprite.setTexture(handTexture);
-	//	newHand.exclamationSprite.setTexture(exclamationTexture);
-	//	Physics::RegisterCollider(&newHand.grabTrigger);
-	//	newHand.transform.SetAttachedTransformable(&newHand.handSprite);
-	//	newHand.transform.SetOrigin(32, 0);
-	//	newHand.grabTrigger.transform.SetParent(&newHand.transform);
-	//	newHand.grabTrigger.transform.SetLocalPosition(0, 0);
-	//}
-
-	//ReadJson(player, colliders);
-	//for (auto& col : colliders) {
-	//	Physics::RegisterCollider(&col);
-	//}
-
 	
 	while (window.isOpen()) {
 		Input::ClearPressedKeys();
@@ -191,169 +33,29 @@ int main(int arc, char** argv) {
 			if (event.type == sf::Event::Resized) {
 				float targetAspect = 16.f / 9;
 				float currentImageAspect = (float)event.size.width / event.size.height;
-				guiCamera.setSize(sf::Vector2f(window.getSize()));
-				guiCamera.setCenter(guiCamera.getSize() / 2.f);
+				game.guiCamera.setSize(sf::Vector2f(window.getSize()));
+				game.guiCamera.setCenter(game.guiCamera.getSize() / 2.f);
 
 				sf::FloatRect newViewportSettings(0, 0, 1, 1);
 				if (currentImageAspect < targetAspect) { // Our window is 
 					newViewportSettings = sf::FloatRect(0, (1.f - currentImageAspect / targetAspect) / 2, 1, currentImageAspect / targetAspect);
-					gui.root->SetLocalPosition(0, guiCamera.getSize().y * ((1.f - currentImageAspect / targetAspect) / 2));
+					game.gui.root->SetLocalPosition(0, game.guiCamera.getSize().y * ((1.f - currentImageAspect / targetAspect) / 2));
 				}
 				else if (currentImageAspect > targetAspect) { // Our window is wider than our game view
 					newViewportSettings = sf::FloatRect((1.f - targetAspect / currentImageAspect) / 2, 0, targetAspect / currentImageAspect, 1);
-					gui.root->SetLocalPosition(guiCamera.getSize().x * ((1.f - targetAspect / currentImageAspect) / 2), 0);
+					game.gui.root->SetLocalPosition(game.guiCamera.getSize().x * ((1.f - targetAspect / currentImageAspect) / 2), 0);
 				}
-				mainCamera.setViewport(newViewportSettings);
-				gui.root->SetRectSize(guiCamera.getSize().x * newViewportSettings.width, guiCamera.getSize().y * newViewportSettings.height);
+				game.mainCamera.setViewport(newViewportSettings);
+				game.gui.root->SetRectSize(game.guiCamera.getSize().x * newViewportSettings.width, game.guiCamera.getSize().y * newViewportSettings.height);
 			}
 			if (event.type == sf::Event::KeyPressed) {
 				Input::AddKeyPress(event.key.code);
 			}
-			gui.ProcessEvent(event);
+			game.gui.ProcessEvent(event);
 		}
 
-		sf::Time time = deltaClock.restart();
-		float deltaTime = time.asSeconds();
-		//if (!player.captured && gui.GetGuiState() != Home) {
-		//	timeSinceLastHand += deltaTime;
-		//}
-		//if (timeSinceLastHand >= timeBetweenHands) { 
-		//	timeSinceLastHand -= timeBetweenHands;
-		//	if (!_handPositions.empty()) {
-		//		auto indexDistribution = std::uniform_int_distribution<int>(0, _handPositions.size() - 1);
-		//		int positionIndex = indexDistribution(generator);
-		//		int handIndex = 0;
-		//		for (size_t i = 0; i < hands.size(); i++) {
-		//			if (hands[i].done) {
-		//				handIndex = i;
-		//				break;
-		//			}
-		//		}
-
-		//		HandSpawnPosition spawnPosition = _handPositions[positionIndex];
-		//		_handPositions.erase(_handPositions.begin() + positionIndex);
-		//		Hand* handToAttackWith = &hands[handIndex];
-
-		//		handToAttackWith->HandFinishCallback = [&_handPositions, spawnPosition]() {
-		//			_handPositions.push_back(spawnPosition);
-		//		};
-		//		handToAttackWith->handSprite.setColor(Hand::SkinColors[colorDistribution(generator)]);
-		//		handToAttackWith->Attack(static_cast<HandSpawnDirection>(static_cast<int>(spawnPosition.direction) < 2
-		//			? sideDistribution(generator)
-		//			: topDistribution(generator)),
-		//			mainCamera, 0.75f, spawnPosition.offset);
-		//	}
-		//}
-
-		//// Held Keys
-		//player.running = false;
-		//if (Input::KeyIsDown(KeyCode::A)) {
-		//	player.running = true;
-		//	if (player.grounded && player.velocity.x > 0) player.velocity.x = 0;
-		//	player.AddVelocity(-sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
-		//	player.facingLeft = false;
-		//}
-		//if (Input::KeyIsDown(KeyCode::D)) {
-		//	if (player.grounded && player.velocity.x < 0) player.velocity.x = 0;
-		//	player.running = true;
-		//	player.AddVelocity(sf::Vector2f((deltaTime * player.groundAcceleration), 0.f));
-		//	player.facingLeft = true;
-		//}
-
-		//if (!player.captured)
-		//{
-
-		//	if (!player.grounded)
-		//	{
-		//		player.animator.SetState("Jump");
-		//	}
-		//	else
-		//	{
-		//		if (!player.running)
-		//		{
-		//			player.animator.SetState("Idle");
-		//		}
-		//		else
-		//		{
-		//			player.animator.SetState("Run");
-		//		}
-		//	}
-		//}
-
-		//// Pressed Keys
-		//if (Input::KeyWasPressed(KeyCode::J)) {
-		//	ReadJson(player, colliders);
-		//	gameSprite.setColor(sf::Color::White);
-		//	std::cout << "Done." << std::endl;
-		//}
-
-		//if (Input::KeyWasPressed(KeyCode::Escape)) {
-		//	std::cout << "Exiting..." << std::endl;
-		//	window.close();
-		//}
-		//if (Input::KeyWasPressed(KeyCode::Space) && player.grounded) {
-		//	player.AddVelocity(0, -player.jumpForce);
-		//}
-
-		//if (!player.captured) {
-		//	player.Update(deltaTime);
-		//	player.collider.transform.SetWorldPosition(player.transform.GetWorldPosition());
-		//}
-
-		//performanceText.setString("Performance (ms): " + std::to_string(time.asMilliseconds()));
-		//player.collider.transform.SetWorldPosition(player.transform.GetWorldPosition());
-
-		//player.grounded = false;
-		//if (player.transform.GetWorldPosition().y >= player.floorOffset) {
-		//	player.transform.SetWorldPosition(player.transform.GetWorldPosition().x, player.floorOffset);
-		//	player.velocity.y = 0;
-		//	player.grounded = true;
-		//}
-
-		//player.collider.transform.SetWorldPosition(player.transform.GetWorldPosition());
-
-		//for (auto& hand : hands)
-		//{
-		//	hand.Update(deltaTime);
-		//}
-
-		//foodItem.glowSprite.transform.LocateRotateBy(15 * deltaTime);
-		//float scaleMod = Lerp(1.00f, 1.25f, (sinf(clockSinceStart.getElapsedTime().asSeconds() * 6) + 1) / 2);
-		//foodItem.foodSprite.transform.SetLocalScale(scaleMod, scaleMod);
-
-		// player.animator.Update(deltaTime);
-
-		// Physics::CheckForCollisionsAndTriggerOverlaps();
-
-		// Draw game world to texture
-		//window.clear();
-		//gameRenderTexture.clear();
-		//gameRenderTexture.setView(mainCamera);
-		//gameRenderTexture.draw(background);
-		//for (const auto& collider : colliders)
-		//{
-		//	gameRenderTexture.draw(collider);
-		//}
-		//for (const auto& hand : hands)
-		//{
-		//	gameRenderTexture.draw(hand);
-		//}
-		//gameRenderTexture.draw(player.sprite);
-		//gameRenderTexture.draw(foodItem);
-		//// gameRenderTexture.draw(foodItem.collider);
-		//gameRenderTexture.display();
-
-		//saturationShader.setUniform("saturation", gameSaturation);
-		//window.draw(gameSprite, &saturationShader);
-		//window.setView(guiCamera);
-
-		//gui.root->UpdateTransforms();
-		//gui.UpdateHoveredElementNew();
-		//window.draw(gui);
-
-		//window.setView(window.getDefaultView());
-		//// Render to window
-		//window.display();
+		game.Tick();
+		game.Render();
 	}
 
 	return 0;

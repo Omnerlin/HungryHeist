@@ -17,3 +17,13 @@ inline float Lerp(float a, float b, float t)
 inline const sf::Vector2f& ScaleVector(const sf::Vector2f& vector, const sf::Vector2f& by) {
     return { vector.x * by.x, vector.y * by.y };
 }
+
+
+/// <summary>
+/// Linear interpolation between two Vector2's
+/// </summary>
+/// <returns>Interpolated vector</returns>
+inline sf::Vector2f LerpVector(const sf::Vector2f& from, const sf::Vector2f& to, float t)
+{
+    return {Lerp(from.x, to.x, t), Lerp(from.y, to.y, t)};
+}

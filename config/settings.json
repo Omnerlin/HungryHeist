@@ -1,8 +1,9 @@
 {
     "timeBetweenHands": 1.0,
-    "referenceResolution": [256, 144],
+    "referenceResolutionX": 256,
+    "referenceResolutionY": 144,
     "screenWidth": 1280,
     "screenHeight": 720,
     "windowTitle": "Janky Game",
-    "fullScreen": false
+    "fullscreen": false
 }

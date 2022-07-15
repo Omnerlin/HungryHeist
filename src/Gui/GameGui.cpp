@@ -48,8 +48,8 @@ GameGuiState GameGui::GetGuiState()
 void GameGui::BuildMenus()
 {
 	// ===== Build Home Menu =====
-	home.CopyAttributesFrom(root);
-	home.SetParent(&root);
+	home.CopyAttributesFrom(*root);
+	home.SetParent(root);
 	home.SetAnchorMin(0, 0);
 	home.SetAnchorMax(1, 1);
 
@@ -74,7 +74,7 @@ void GameGui::BuildMenus()
 	QuitButton.InitElement();
 
 	// ===== Build End Menu =====
-	end.SetParent(&root);
+	end.SetParent(root);
 	end.CopyAttributesFrom(home);
 
 
@@ -103,7 +103,7 @@ void GameGui::BuildMenus()
 	EndQuitButton.text.text.setString("QUIT");
 	EndQuitButton.InitElement();
 
-	ScoreText.SetParent(&root);
+	ScoreText.SetParent(root);
 	ScoreText.text.setFillColor(sf::Color::White);
 	ScoreText.text.setFont(*gameFont);
 	ScoreText.text.setString("Food Eaten: 0");

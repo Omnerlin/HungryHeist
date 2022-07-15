@@ -1,5 +1,6 @@
 #include "FoodItem.h"
-#include "../Assets.h"
+#include "Assets.h"
+#include "Physics.h"
 
 void FoodItem::Initialize()
 {
@@ -13,11 +14,11 @@ void FoodItem::Initialize()
 	glowSprite.transform.SetParent(&foodSprite.transform);
 	glowSprite.transform.SetLocalScale(0.25f, 0.25f);
 	glowSprite.transform.SetOrigin(256.f / 2, 256.f / 2);
-	transform.SetWorldPosition(0, -64);
 	foodSprite.drawable.setTexture(Assets::LoadTexture("assets/textures/food.png"));
 	glowSprite.drawable.setTexture(Assets::LoadTexture("assets/textures/flare.png"));
 	collider.drawable.setFillColor(sf::Color(255, 255, 255, 100));
 	AssignType(FoodType::Pizza);
+	Physics::RegisterCollider(&collider);
 }
 
 void FoodItem::AssignRandomType()

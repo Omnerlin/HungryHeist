@@ -112,14 +112,12 @@ void Hand::Update(float deltaTime) {
 	}
 	break;
 
-	// Warning that it is going to attack
-	case HandState::Warning:
+	case HandState::Warning:	// Warning that it is going to attack
 		if (_timeSinceStateChange >= warningDuration)
 			SetHandState(HandState::Attacking);
 		break;
 
-		// Move towards target
-	case HandState::Attacking:
+	case HandState::Attacking:	// Move towards target
 		posX = Lerp(_homePosition.x, _targetPosition.x, _timeSinceStateChange / _speed);
 		posY = Lerp(_homePosition.y, _targetPosition.y, _timeSinceStateChange / _speed);
 
@@ -132,13 +130,9 @@ void Hand::Update(float deltaTime) {
 		}
 		break;
 
-		// Move back to home
-	case HandState::Retreating:
+	case HandState::Retreating: // Move back to home
 		if (capturedPlayer) return;
 		float colorA = Lerp(255, 0, _timeSinceStateChange / _speed);
-		//posX = lerp(_targetPosition.x, _homePosition.x,  _timeSinceStateChange / _speed);
-		//posY = lerp(_targetPosition.y, _homePosition.y, _timeSinceStateChange / _speed);
-
 		if (_timeSinceStateChange >= _speed) {
 			handSprite.setColor(sf::Color::Transparent);
 			transform.SetWorldPosition(_homePosition);

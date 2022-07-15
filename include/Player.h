@@ -22,13 +22,13 @@ struct Player {
 	bool running{ false };
 	bool facingLeft{ false };
 	bool captured{ false };
+	bool inputEnabled { true };
 	sf::Vector2f velocity{ 0,0 };
 	sf::Vector2f prevPosition{ 0,0 };
 
 	void Initialize();
 	void AddVelocity(const sf::Vector2f& addVelocity);
 	void AddVelocity(float x, float y);
-	void Update(float deltaTime);
 	void Update(float deltaTime);
 	void LoadSettingsFromConfig();
 	void ResolveMovementCollision(Collider* other);

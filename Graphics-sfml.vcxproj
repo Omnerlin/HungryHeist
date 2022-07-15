@@ -103,7 +103,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>include;deps\SFML-2.5.1\include;</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -122,20 +122,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Assets.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="HandSpawner.cpp" />
     <ClCompile Include="include\FoodItem.cpp" />
     <ClCompile Include="include\Gui\GuiElement.cpp" />
+    <ClCompile Include="src\Assets.cpp" />
     <ClCompile Include="src\Collider.cpp" />
     <ClCompile Include="src\DrawnEntity.cpp" />
     <ClCompile Include="src\EntityTransform.cpp" />
+    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GuiText.cpp" />
     <ClCompile Include="src\Gui\GameGui.cpp" />
     <ClCompile Include="src\Gui\Gui.cpp" />
     <ClCompile Include="src\Gui\GuiButton.cpp" />
     <ClCompile Include="src\Gui\GuiTransform.cpp" />
     <ClCompile Include="src\Hand.cpp" />
+    <ClCompile Include="src\HandSpawner.cpp" />
     <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Noise.cpp" />
@@ -143,9 +143,9 @@
     <ClCompile Include="src\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Assets.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="HandSpawner.h" />
+    <ClInclude Include="include\Assets.h" />
+    <ClInclude Include="include\Game.h" />
+    <ClInclude Include="include\HandSpawner.h" />
     <ClInclude Include="include\SpriteAnimation.h" />
     <ClInclude Include="include\Collider.h" />
     <ClInclude Include="include\DrawnEntity.h" />

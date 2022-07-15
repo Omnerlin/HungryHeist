@@ -1,8 +1,11 @@
 #include "Gui/GuiButton.h"
 
+#include "Assets.h"
+
 void GuiButton::HandleMouseDown()
 {
 	visualElement.SetLocalScale({ 0.9f, 0.9f });
+	mouseDownSound.play();
 }
 
 void GuiButton::HandleMouseUp()
@@ -13,10 +16,12 @@ void GuiButton::HandleMouseUp()
 			c();
 		}
 	}
+	mouseUpSound.play();
 }
 
 void GuiButton::HandleMouseEnter()
 {
+	hoverSound.play();
 	visualElement.SetLocalScale({ 1.1f, 1.1f });
 }
 
@@ -44,4 +49,9 @@ void GuiButton::InitElement()
 	text.SetLocalPosition(visualElement.GetLocalPosition().x - text.text.getLocalBounds().width / 2.f, text.text.getLocalBounds().height / 3.f);
 	text.text.setFillColor(sf::Color::Black);
 
+	hoverSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/UI/rollover4.wav"));
+	hoverSound.setVolume(600);
+	mouseDownSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/Switches/switch24.wav"));
+	mouseUpSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/UI/rollover2.wav"));
+	mouseUpSound.setVolume(600);
 }
