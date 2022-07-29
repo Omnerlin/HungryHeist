@@ -17,10 +17,12 @@ public:
 	//GuiElement* UpdateHoveredElement();
 	void UpdateHoveredElementNew();
 	GuiElement* UpdateHoveredElement(GuiElement* element);
+	const sf::Vector2f& GetMousePosition();
 
 private:
 	void DrawElement(GuiElement* element, sf::RenderTarget& target, sf::RenderStates states) const;
 
 protected:
 	sf::Vector2f _mousePosition;
+	sf::Vector2f _mouseDelta;
 };

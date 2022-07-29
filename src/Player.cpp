@@ -17,10 +17,7 @@
 #include "Assets.h"
 
 void Player::LoadSettingsFromConfig() {
-	char tmp[256];
-	getcwd(tmp, 256);
-	std::cout << "Current working directory: " << tmp << std::endl;
-	std::ifstream config("config/player.json");
+	std::ifstream config(Game::GetAbsolutePath("config/player.json"));
 	std::stringstream configBuffer;
 	configBuffer << config.rdbuf();
 
@@ -75,6 +72,7 @@ void Player::Update(float deltaTime) {
 		}
 		if (Input::KeyWasPressed(KeyCode::Space) && grounded) {
 			AddVelocity(0, -jumpForce);
+			jumpSound.play();
 		}
 	}
 
@@ -118,11 +116,16 @@ void Player::Update(float deltaTime) {
 	transform.SetWorldScale(facingLeft ? -1 : 1, 1);
 	transform.SetWorldPosition(currentPosition);
 
+	groundedLastFrame = grounded;
 	grounded = false;
 	if (transform.GetWorldPosition().y >= floorOffset) {
 		transform.SetWorldPosition(transform.GetWorldPosition().x, floorOffset);
 		velocity.y = 0;
 		grounded = true;
+		if(!groundedLastFrame)
+		{
+			landingSound.play();
+		}
 	}
 }
 
@@ -167,6 +170,10 @@ void Player::Initialize()
 	Physics::RegisterCollider(&collider);
 	collider.CollisionStayCallback.emplace_back([this](Collider* col) { ResolveMovementCollision(col); });
 	collider.transform.SetParent(&transform);
+
+	jumpSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/jump.wav"));
+	landingSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/landing.wav"));
+	landingSound.SetBaseVolume(50);
 }
 
 void Player::AddVelocity(const sf::Vector2f& addVelocity) {
@@ -175,6 +182,7 @@ void Player::AddVelocity(const sf::Vector2f& addVelocity) {
 }
 
 void Player::ResolveMovementCollision(Collider* other) {
+
 	// Test collision for player
 	sf::FloatRect bounds = other->drawable.getGlobalBounds();
 	if (other->HasCollisionDirectionEnabled(Bottom) && velocity.y < 0 &&
@@ -189,6 +197,10 @@ void Player::ResolveMovementCollision(Collider* other) {
 		prevPosition.y <= (bounds.top)) {
 		// We hit the top
 		grounded = true;
+		if(!groundedLastFrame)
+		{
+			landingSound.play();
+		}
 		velocity.y = 0;
 		transform.SetWorldPosition(transform.GetWorldPosition().x, bounds.top);
 	}

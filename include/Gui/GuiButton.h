@@ -2,7 +2,7 @@
 #include "GuiElement.h"
 #include "GuiText.h"
 #include <functional>
-#include <SFML/Audio/Sound.hpp>
+#include "GameSound.h"
 
 struct GuiButton : public GuiElement
 {
@@ -12,12 +12,13 @@ struct GuiButton : public GuiElement
 	virtual void HandleMouseExit() override;
 	virtual void InitElement() override;
 
-	sf::Sound hoverSound;
-	sf::Sound mouseDownSound;
-	sf::Sound mouseUpSound;
+	GameSound hoverSound;
+	GameSound mouseDownSound;
+	GameSound mouseUpSound;
 
 	std::vector<std::function<void()>> onClick;
 	GuiElement visualElement;
 	GUIText text;
-	sf::Texture* buttonTexture;
+	sf::Texture* buttonBaseTexture;
+	sf::Texture* buttonHoverTexture;
 };

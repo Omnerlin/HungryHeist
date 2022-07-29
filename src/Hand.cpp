@@ -52,6 +52,7 @@ void Hand::SetHandState(HandState state) {
 	oldPosition = transform.GetWorldPosition();
 	switch (state) {
 	case HandState::Warning:
+		sonarSound.play();
 		grabTrigger.enabled = false;
 		break;
 	case HandState::Attacking:
@@ -123,6 +124,7 @@ void Hand::Update(float deltaTime) {
 
 		if (_timeSinceStateChange >= _speed) {
 			transform.SetWorldPosition(_targetPosition);
+			handFinishSound.play();
 			SetHandState(HandState::Waiting);
 		}
 		else {
@@ -150,7 +152,11 @@ void Hand::Update(float deltaTime) {
 }
 
 void Hand::draw(sf::RenderTarget& target, sf::RenderStates states) const {
-	target.draw(handSprite, states);
+
+	if(!done && _currentState != HandState::Warning)
+	{
+		target.draw(handSprite, states);
+	}
 	if (_currentState == HandState::Warning) {
 		target.draw(exclamationSprite, states);
 	}

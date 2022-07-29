@@ -32,6 +32,10 @@ void GuiElement::HandleMouseExit()
 	SetColor(defaultColor);
 }
 
+void GuiElement::HandleMouseDrag(float deltaX, float deltaY)
+{
+}
+
 void GuiElement::SetActiveHierarchy(bool active, bool shouldCaptureEvents)
 {
 	isActive = active;

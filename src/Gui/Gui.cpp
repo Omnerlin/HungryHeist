@@ -1,10 +1,17 @@
 #include "Gui/Gui.h"
 #include <iostream>
+#include <ranges>
 
 void Gui::ProcessEvent(sf::Event& event)
 {
 	if (event.type == sf::Event::MouseMoved) {
-		_mousePosition = { (float)event.mouseMove.x, (float)event.mouseMove.y };
+		const sf::Vector2f newMousePos = { (float)event.mouseMove.x, (float)event.mouseMove.y };
+		_mouseDelta = newMousePos - _mousePosition;
+		_mousePosition = newMousePos;
+		if(_clickedElement != nullptr)
+		{
+			_clickedElement->HandleMouseDrag(_mouseDelta.x, _mouseDelta.y);
+		}
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Button::Left) {
@@ -51,8 +58,9 @@ GuiElement* Gui::UpdateHoveredElement(GuiElement* element)
 
 	if (!element->isActive) return nullptr;
 	auto children = element->GetChildren();
-	for (auto childItr = children->rbegin(); childItr != children->rend(); childItr++) {
-		GuiElement* test = dynamic_cast<GuiElement*>(*childItr);
+	for (auto childItr : std::ranges::reverse_view(*children))
+	{
+		GuiElement* test = dynamic_cast<GuiElement*>(childItr);
 		if (test == nullptr) continue;
 		if (!test->GetChildren()->empty())
 		{
@@ -73,6 +81,11 @@ GuiElement* Gui::UpdateHoveredElement(GuiElement* element)
 	}
 
 	return nullptr;
+}
+
+const sf::Vector2f& Gui::GetMousePosition()
+{
+	return _mousePosition;
 }
 
 void Gui::draw(sf::RenderTarget& target, sf::RenderStates states) const

@@ -135,6 +135,12 @@ const sf::Color GuiTransform::GetDebugColor() const
 	return debug_color;
 }
 
+void GuiTransform::SetTexture(sf::Texture& texture, bool resetRect)
+{
+	texture.setSmooth(true);
+	rect.setTexture(&texture, resetRect);
+}
+
 void GuiTransform::SetAnchoredPosition(const sf::Vector2f& anchoredPosition)
 {
 	this->_anchoredPosition = anchoredPosition;

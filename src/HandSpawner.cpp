@@ -34,6 +34,11 @@ void HandSpawner::Initialize()
 		newHand.transform.SetOrigin(32, 0);
 		newHand.grabTrigger.transform.SetParent(&newHand.transform);
 		newHand.grabTrigger.transform.SetLocalPosition(0, 0);
+
+		newHand.handFinishSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/handFinish.ogg"));
+		newHand.sonarSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/sonar.wav"));
+		newHand.handFinishSound.SetBaseVolume(30);
+		newHand.sonarSound.SetBaseVolume(50);
 	}
 }
 

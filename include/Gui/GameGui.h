@@ -1,6 +1,8 @@
 #pragma once
 #include "Gui.h"
 #include "Gui/GuiButton.h"
+#include "Gui/GuiSlider.h"
+#include "Gui/GuiToggle.h"
 
 enum GameGuiState
 {
@@ -8,6 +10,8 @@ enum GameGuiState
 	Home,
 	Play,
 	End,
+	Pause,
+	Settings
 };
 
 
@@ -20,12 +24,28 @@ struct GameGui : Gui
 	void SetScore(int score);
 	sf::Font* gameFont;
 
-	GuiButton PlayButton;
-	GuiButton QuitButton;
-	GuiButton ReplayButton;
-	GuiButton EndQuitButton;
-	GuiButton HomeButton;
-	GUIText ScoreText;
+	GUIText title;
+	GuiButton playButton;
+	GuiButton quitButton;
+	GuiButton replayButton;
+	GuiButton endQuitButton;
+	GuiButton homeButton;
+	GUIText scoreText;
+
+	GUIText pausedText;
+	GuiElement pausedPanel;
+
+	GuiElement settingsPanel;
+	GUIText settingsTitle;
+	GuiButton settingsButton;
+	GuiSlider volumeSlider;
+	GuiToggle fullscreenToggle;
+	GuiButton settingsReturnButton;
+	GUIText volumeText;
+
+	
+	GUIText gameOverText;
+	GUIText gameOverStats;
 
 private:
 	GameGuiState _guiState = GameGuiState::None;

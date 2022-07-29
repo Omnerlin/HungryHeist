@@ -35,6 +35,7 @@ struct Collider : DrawnEntity<sf::RectangleShape> {
     void InvokeEndCallbackAgainstCollider(Collider* collider);
     void InvokeCallbacks(const std::vector<std::function<void(Collider*)>>& callbacks, Collider* arg);
 	bool enabled { true };
+    bool draw{ false };
 };
 
 std::vector<Collider> LoadCollidersFromConfig();

@@ -1,8 +1,10 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio/Sound.hpp>
 #include "Collider.h"
 #include "SpriteAnimator.h"
 #include "DrawnEntity.h"
+#include "GameSound.h"
 
 struct Player {
 	// Transform
@@ -19,6 +21,7 @@ struct Player {
 	float jumpForce{ 600.f };
 	float airDrag{ 1000.f };
 	bool grounded{ false };
+	bool groundedLastFrame{ false };
 	bool running{ false };
 	bool facingLeft{ false };
 	bool captured{ false };
@@ -39,6 +42,8 @@ struct Player {
 	SpriteAnimation jumpAnim;
 	SpriteAnimation sadAnim;
 
+	GameSound jumpSound;
+	GameSound landingSound;
 
 	// Collision
 	Collider collider;

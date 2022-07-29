@@ -1,10 +1,15 @@
 #include "Game.h"
 
 #include "Assets.h"
+#include "Input.h"
 #include "Physics.h"
 #include "Utils.h"
+#include "SFML/Audio/Listener.hpp"
 
 Game* Game::Instance = nullptr;
+std::vector<GameSound*> Game::registeredSounds;
+std::vector<GameMusic*> Game::registeredMusic;
+std::filesystem::path Game::rootPath;
 
 Game::Game(sf::RenderWindow* renderWindow) : window(renderWindow)
 {
@@ -26,21 +31,35 @@ void Game::SetGameState(GameState targetState)
 {
 	GameState previousState = currentState;
 	if (targetState == currentState) return;
+
 	switch (targetState)
 	{
 	case GameState::MainMenu:
+		StopAllSounds();
+		background.setFillColor(sf::Color::White);
+		handSpawner.ResetHands();
 		handSpawner.handSpawningEnabled = false;
 		gameSaturation = 1;
 		gui.SetGuiState(GameGuiState::Home);
 		player.inputEnabled = false;
-		foodItem.transform.SetWorldScale(0,0);
+		foodItem.transform.SetWorldScale(0, 0);
 		foodItem.collider.enabled = false;
 		ResetHands();
 		ResetPlayer();
+		mainMenuMusic.SetBaseVolume(50);
+		mainMenuMusic.play();
 		break;
 
 	case GameState::FirstPizza:
+		foodScore = 0;
+		StopAllSounds();
+		handSpawner.ResetHands();
+		handSpawner.handSpawningEnabled = false;
+		gameplayMusic.stop();
 		choirSound.play();
+		prePizzaMusic.SetBaseVolume(100);
+		prePizzaMusic.play();
+		mainMenuMusic.stop();
 		gameSaturation = 1;
 		gui.SetScore(0);
 		gui.SetGuiState(GameGuiState::Play);
@@ -49,7 +68,8 @@ void Game::SetGameState(GameState targetState)
 		foodItem.transform.SetWorldPosition(0, -64);
 		foodItem.transform.SetWorldScale(1, 1);
 		foodItem.collider.enabled = true;
-		if(previousState != GameState::MainMenu)
+
+		if (previousState != GameState::MainMenu)
 		{
 			ResetHands();
 			ResetPlayer();
@@ -77,6 +97,9 @@ void Game::SetGameState(GameState targetState)
 		break;
 
 	case GameState::End:
+		recordScratch.play();
+		gameplayMusic.stop();
+		sadMusic.play();
 		handSpawner.handSpawningEnabled = false;
 		player.inputEnabled = false;
 		gui.SetGuiState(GameGuiState::End);
@@ -100,9 +123,11 @@ void Game::SetGameState(GameState targetState)
 		}
 		break;
 
-	case GameState::None: 
+	case GameState::None:
 		break;
 	}
+
+	paused = false;
 	currentState = targetState;
 }
 
@@ -124,9 +149,11 @@ void Game::Initialize()
 	// Rendering Setup
 	mainCamera = sf::View(sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f),
 		sf::Vector2f(settings.referenceResolutionX, settings.referenceResolutionY));
-	guiCamera = window->getDefaultView();
 
-	saturationShader.loadFromFile("assets/shaders/saturation.frag", sf::Shader::Fragment);
+	auto videoSize = /*settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : */sf::VideoMode(settings.screenWidth, settings.screenHeight);
+	guiCamera = sf::View(sf::Vector2f(0.5f * videoSize.width, 0.5f * videoSize.height), sf::Vector2f(videoSize.width, videoSize.height));
+
+	saturationShader.loadFromFile(Game::GetAbsolutePath("assets/shaders/saturation.frag"), sf::Shader::Fragment);
 	saturationShader.setParameter("texture", sf::Shader::CurrentTexture);
 
 	if (!gameRenderTexture.create(settings.screenWidth, settings.screenHeight)) {
@@ -142,7 +169,7 @@ void Game::Initialize()
 			munchSounds[foodSoundDistribution(randGenerator)].play();
 			foodScore++;
 			gui.SetScore(foodScore);
-			if(currentState == GameState::FirstPizza)
+			if (currentState == GameState::FirstPizza)
 			{
 				SetGameState(GameState::MonsterScream);
 			}
@@ -160,17 +187,31 @@ void Game::Initialize()
 	choirSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/choir.wav"));
 	rumbleSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/rumble.wav"));
 	lightSwitchSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/Switches/switch3.wav"));
-	sf::Sound munch0, munch1, munch2;
-	munch0.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_01.ogg"));
-	munch1.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_03.ogg"));
-	munch2.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_04.ogg"));
-	munchSounds.emplace_back(munch0);
-	munchSounds.emplace_back(munch1);
-	munchSounds.emplace_back(munch2);
+	//GameSound munch0, munch1, munch2;
+	//munch0.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_01.ogg"));
+	//munch1.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_03.ogg"));
+	//munch2.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_04.ogg"));
+	munchSounds.reserve(3);
+	munchSounds.emplace_back(GameSound());
+	munchSounds.emplace_back(GameSound());
+	munchSounds.emplace_back(GameSound());
+	munchSounds[0].setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_01.ogg"));
+	munchSounds[1].setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_03.ogg"));
+	munchSounds[2].setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_04.ogg"));
 	rumbleSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/rumble.wav"));
 	monsterSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/roar.wav"));
 	doorSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/doorOpen2.wav"));
+	recordScratch.setBuffer(Assets::LoadSoundBuffer("assets/sounds/recordScratch.wav"));
 
+	gameplayMusic.openFromFile(GetAbsolutePath("assets/music/gameplayMusic.wav"));
+	gameplayMusic.setLoop(true);
+	gameplayMusic.SetBaseVolume(50);
+	mainMenuMusic.openFromFile(GetAbsolutePath("assets/music/forestLoop.ogg"));
+	mainMenuMusic.setLoop(true);
+	prePizzaMusic.openFromFile(GetAbsolutePath("assets/music/preEatMusic.wav"));
+	prePizzaMusic.setLoop(true);
+	sadMusic.openFromFile(GetAbsolutePath("assets/music/sadPiano.wav"));
+	sadMusic.setLoop(true);
 
 	// GUI
 	root_element.SetColor(sf::Color(255, 255, 255, 0));
@@ -178,12 +219,29 @@ void Game::Initialize()
 	gui.root = &root_element;
 	gui.gameFont = gameFont;
 	gui.BuildMenus();
-	gui.QuitButton.onClick.emplace_back([this]() { window->close(); });
-	gui.EndQuitButton.onClick.emplace_back([this]() { window->close(); });
-	gui.PlayButton.onClick.emplace_back([this]() { SetGameState(GameState::FirstPizza); });
-	gui.ReplayButton.onClick.emplace_back([this]() { SetGameState(GameState::FirstPizza); });
-	gui.HomeButton.onClick.emplace_back([this]() { SetGameState(GameState::MainMenu); });
+	gui.quitButton.onClick.emplace_back([this]() { window->close(); });
+	gui.endQuitButton.onClick.emplace_back([this]() { window->close(); });
+	gui.playButton.onClick.emplace_back([this]() { SetGameState(GameState::FirstPizza); });
+	gui.replayButton.onClick.emplace_back([this]() { SetGameState(GameState::FirstPizza); });
+	gui.homeButton.onClick.emplace_back([this]() { SetGameState(GameState::MainMenu); });
+	gui.settingsButton.onClick.emplace_back([this]() { gui.SetGuiState(GameGuiState::Settings); });
+	gui.settingsReturnButton.onClick.emplace_back([this]() { SaveJsonSettings(); gui.SetGuiState(GameGuiState::Home); });
+	HandleResize({ settings.screenWidth, settings.screenHeight });
+	gameSprite.setScale((float)window->getSize().x / settings.screenWidth,
+		(float)window->getSize().y / settings.screenHeight);
 
+
+	gui.fullscreenToggle.onToggleChanged = [this](bool bol) {settings.fullscreen = bol;  window->create(settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode(settings.screenWidth, settings.screenHeight),
+		settings.windowTitle, settings.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+	window->setFramerateLimit(60);
+	HandleResize({ window->getSize().x, window->getSize().y });
+	gameSprite.setScale((float)window->getSize().x / settings.screenWidth,
+		(float)window->getSize().y / settings.screenHeight);
+	};
+	gui.volumeSlider.sliderValueChanged = [this](float value) { settings.masterVolume = value; SetMasterVolume(value); };
+
+
+	gui.volumeSlider.SetValue(settings.masterVolume, true);
 
 	SetGameState(GameState::MainMenu);
 }
@@ -191,7 +249,7 @@ void Game::Initialize()
 void Game::ApplySettingsFromJson()
 {
 	std::cout << "Loading Configuration" << std::endl;
-	std::ifstream config("config/settings.json");
+	std::ifstream config(GetAbsolutePath("config/settings.json"));
 	std::stringstream configBuffer;
 	configBuffer << config.rdbuf();
 
@@ -204,14 +262,17 @@ void Game::ApplySettingsFromJson()
 		settings.screenHeight = json["screenHeight"].get<unsigned int>();
 		settings.windowTitle = json["windowTitle"].get<std::string>();
 		settings.fullscreen = json["fullscreen"].get<bool>();
+		settings.masterVolume = json["masterVolume"].get<float>();
 	}
 	catch (const std::exception& e) {
 		std::cout << "Error opening game config file." << e.what() << std::endl;
 		std::cerr << e.what() << std::endl;
 	}
 
-	window->create(sf::VideoMode(settings.screenWidth, settings.screenHeight),
+	
+	window->create(settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode(settings.screenWidth, settings.screenHeight),
 		settings.windowTitle, settings.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+	window->setFramerateLimit(60);
 
 
 	for (auto& col : colliders) {
@@ -228,6 +289,24 @@ void Game::ApplySettingsFromJson()
 	std::cout << "Configuration Loaded." << std::endl;
 }
 
+void Game::SaveJsonSettings()
+{
+	nlohmann::json settingsSave;
+
+	settingsSave["timeBetweenHands"] = settings.timeBetweenHands;
+	settingsSave["referenceResolutionX"] = settings.referenceResolutionX;
+	settingsSave["referenceResolutionY"] = settings.referenceResolutionY;
+	settingsSave["screenWidth"] = settings.screenWidth;
+	settingsSave["screenHeight"] = settings.screenHeight;
+	settingsSave["windowTitle"] = settings.windowTitle;
+	settingsSave["fullscreen"] = settings.fullscreen;
+	settingsSave["masterVolume"] = settings.masterVolume;
+
+	std::ofstream config(GetAbsolutePath("config/settings.json"));
+	config << settingsSave;
+	config.close();
+}
+
 void Game::ResetHands()
 {
 	for (auto& hand : handSpawner.hands) {
@@ -242,82 +321,112 @@ void Game::ResetPlayer()
 	player.transform.SetParent(nullptr);
 	player.transform.SetLocalRotation(0);
 	player.transform.SetWorldPosition(0, 0);
-	player.velocity = sf::Vector2f(0,0);
+	player.velocity = sf::Vector2f(0, 0);
 }
 
 void Game::Tick()
 {
-	const float deltaTime = deltaClock.restart().asSeconds();
-
-	if(currentState == GameState::FirstPizza)
+	float deltaTime = deltaClock.restart().asSeconds();
+	if(deltaTime > 1.f / 20.f)
 	{
-		mainCamera.setSize(LerpVector(mainCamera.getSize(), sf::Vector2f{ settings.referenceResolutionX, settings.referenceResolutionY } * 0.6f, deltaTime * 5.f));
-		mainCamera.setCenter(LerpVector(mainCamera.getCenter(), (player.transform.GetWorldPosition() + foodItem.transform.GetWorldPosition()) / 2.f, deltaTime * 5.f));
-	}
-	else if (currentState == GameState::End)
-	{
-		gameSaturation = Lerp(gameSaturation, 0, deltaTime * 2.f);
-		mainCamera.setSize(LerpVector(mainCamera.getSize(), sf::Vector2f{ settings.referenceResolutionX, settings.referenceResolutionY } * 0.8f, deltaTime * 5.f));
-		mainCamera.setCenter(LerpVector(mainCamera.getCenter(), player.transform.GetWorldPosition() + sf::Vector2f(0, mainCamera.getSize().y / 2.5f), deltaTime * 5.f));
-	}
-	else
-	{
-		mainCamera.setSize(LerpVector(mainCamera.getSize(), sf::Vector2f{ settings.referenceResolutionX, settings.referenceResolutionY }, deltaTime * 5.f));
-		mainCamera.setCenter(LerpVector(mainCamera.getCenter(), sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f), deltaTime * 5.f));
+		deltaTime = 1.f / 20.f;
 	}
 
-	if(currentState == GameState::MonsterScream)
+	if (currentState != GameState::MainMenu && currentState != GameState::End && Input::KeyWasPressed(KeyCode::Escape))
 	{
-		if(monsterTransitionTimeLeft > 0)
+		paused = !paused;
+		if (paused)
 		{
-			monsterTransitionTimeLeft -= deltaTime;
-			if(playDoor && monsterTransitionTimeLeft <= 0.7f)
-			{
-				doorSound.play();
-				playDoor = false;
-			}
-			if(monsterTransitionTimeLeft <= 0)
-			{
-				lightSwitchSound.play();
-				background.setFillColor(sf::Color::White);
-			}
-		}
-		else if(lightSwitchTimeLeft > 0)
-		{
-			lightSwitchTimeLeft -= deltaTime;
-			if(lightSwitchTimeLeft <= 0)
-			{
-				monsterSound.play();
-				rumbleSound.play();
-			}
+			gui.SetGuiState(GameGuiState::Pause);
 		}
 		else
 		{
-			float intensity = 1.5f;
-			float noiseX = camNoise.normalizedOctave1D(monsterScreamTimeLeft * 20, 1);
-			float noiseY = camNoise.normalizedOctave1D(monsterScreamTimeLeft * 50, 1);
-			mainCamera.setCenter(sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f) + sf::Vector2f(noiseX, noiseY) * intensity);
-			monsterScreamTimeLeft -= deltaTime;
-			if(monsterScreamTimeLeft <= 0)
+			gui.SetGuiState(GameGuiState::Play);
+		}
+	}
+
+	if (!paused) {
+
+
+		if (currentState == GameState::FirstPizza)
+		{
+			mainCamera.setSize(LerpVector(mainCamera.getSize(), sf::Vector2f{ settings.referenceResolutionX, settings.referenceResolutionY } *0.6f, deltaTime * 5.f));
+			mainCamera.setCenter(LerpVector(mainCamera.getCenter(), (player.transform.GetWorldPosition() + foodItem.transform.GetWorldPosition()) / 2.f, deltaTime * 5.f));
+		}
+		else if (currentState == GameState::End)
+		{
+			gameSaturation = Lerp(gameSaturation, 0, deltaTime * 2.f);
+			mainCamera.setSize(LerpVector(mainCamera.getSize(), sf::Vector2f{ settings.referenceResolutionX, settings.referenceResolutionY } *0.6f, deltaTime * 5.f));
+			mainCamera.setCenter(LerpVector(mainCamera.getCenter(), player.transform.GetWorldPosition() + sf::Vector2f(player.transform.GetWorldRotation() < 90 ? -32 : 32, 0), deltaTime * 5.f));
+		}
+		else
+		{
+			mainCamera.setSize(LerpVector(mainCamera.getSize(), sf::Vector2f{ settings.referenceResolutionX, settings.referenceResolutionY }, deltaTime * 5.f));
+			mainCamera.setCenter(LerpVector(mainCamera.getCenter(), sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f), deltaTime * 5.f));
+		}
+
+		if (currentState == GameState::MonsterScream)
+		{
+			if (monsterTransitionTimeLeft > 0)
 			{
-				mainCamera.setCenter(sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f));
-				rumbleSound.stop();
-				SetGameState(GameState::Gameplay);
+				monsterTransitionTimeLeft -= deltaTime;
+				if (monsterTransitionTimeLeft > 0)
+				{
+					prePizzaMusic.SetBaseVolume(Lerp(0, 100, monsterTransitionTimeLeft / monsterTransitionTime));
+				}
+
+				if (playDoor && monsterTransitionTimeLeft <= 0.7f)
+				{
+					doorSound.play();
+					playDoor = false;
+				}
+				if (monsterTransitionTimeLeft <= 0)
+				{
+					prePizzaMusic.stop();
+					lightSwitchSound.play();
+					background.setFillColor(sf::Color::White);
+				}
+			}
+			else if (lightSwitchTimeLeft > 0)
+			{
+				lightSwitchTimeLeft -= deltaTime;
+				if (lightSwitchTimeLeft <= 0)
+				{
+					monsterSound.play();
+					rumbleSound.play();
+				}
+			}
+			else
+			{
+				float intensity = 1.5f;
+				float noiseX = camNoise.normalizedOctave1D(monsterScreamTimeLeft * 20, 1);
+				float noiseY = camNoise.normalizedOctave1D(monsterScreamTimeLeft * 50, 1);
+				mainCamera.setCenter(sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f) + sf::Vector2f(noiseX, noiseY) * intensity);
+				monsterScreamTimeLeft -= deltaTime;
+
+				if (monsterScreamTimeLeft <= 0.5f && gameplayMusic.getStatus() != sf::SoundSource::Playing)
+				{
+					gameplayMusic.play();
+				}
+				if (monsterScreamTimeLeft <= 0)
+				{
+					mainCamera.setCenter(sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f));
+					rumbleSound.stop();
+					SetGameState(GameState::Gameplay);
+				}
 			}
 		}
+
+		player.Update(deltaTime);
+		handSpawner.Update(deltaTime);
+		Physics::CheckForCollisionsAndTriggerOverlaps();
 	}
 
 	foodItem.glowSprite.transform.LocateRotateBy(15 * deltaTime);
 	const float scaleMod = Lerp(1.00f, 1.25f, (sinf(absoluteClock.getElapsedTime().asSeconds() * 6) + 1) / 2);
 	foodItem.foodSprite.transform.SetLocalScale(scaleMod, scaleMod);
-
-	player.Update(deltaTime);
-	handSpawner.Update(deltaTime);
 	player.animator.Update(deltaTime);
-	gui.root->UpdateTransforms();
-	gui.UpdateHoveredElementNew();
 
-	Physics::CheckForCollisionsAndTriggerOverlaps();
 }
 
 void Game::Render()
@@ -329,7 +438,7 @@ void Game::Render()
 	gameRenderTexture.draw(background);
 	for (const auto& collider : colliders)
 	{
-		if (collider.colliderType == ColliderType::Solid)
+		if (collider.draw)
 		{
 			gameRenderTexture.draw(collider);
 		}
@@ -353,4 +462,46 @@ void Game::Render()
 	window->setView(window->getDefaultView());
 	// Render to window
 	window->display();
+}
+
+void Game::StopAllSounds()
+{
+	gameplayMusic.stop();
+	prePizzaMusic.stop();
+	mainMenuMusic.stop();
+	rumbleSound.stop();
+	choirSound.stop();
+	monsterSound.stop();
+	sadMusic.stop();
+}
+
+void Game::HandleResize(const sf::Vector2u& size)
+{
+	float targetAspect = 16.f / 9;
+	float currentImageAspect = (float)size.x / size.y;
+	guiCamera.setSize(sf::Vector2f(window->getSize()));
+	guiCamera.setCenter(guiCamera.getSize() / 2.f);
+
+	sf::FloatRect newViewportSettings(0, 0, 1, 1);
+	if (currentImageAspect < targetAspect) { // Our window is 
+		newViewportSettings = sf::FloatRect(0, (1.f - currentImageAspect / targetAspect) / 2, 1, currentImageAspect / targetAspect);
+		gui.root->SetLocalPosition(0, guiCamera.getSize().y * ((1.f - currentImageAspect / targetAspect) / 2));
+	}
+	else if (currentImageAspect > targetAspect) { // Our window is wider than our view
+		newViewportSettings = sf::FloatRect((1.f - targetAspect / currentImageAspect) / 2, 0, targetAspect / currentImageAspect, 1);
+		gui.root->SetLocalPosition(guiCamera.getSize().x * ((1.f - targetAspect / currentImageAspect) / 2), 0);
+	}
+	mainCamera.setViewport(newViewportSettings);
+	gui.root->SetRectSize(guiCamera.getSize().x * newViewportSettings.width, guiCamera.getSize().y * newViewportSettings.height);
+}
+
+void Game::SetMasterVolume(float volume)
+{
+	settings.masterVolume = volume;
+	sf::Listener::setGlobalVolume(volume * 100);
+}
+
+std::string Game::GetAbsolutePath(const std::string& path)
+{
+	return std::filesystem::path(rootPath).append(path).string();
 }

@@ -2,7 +2,10 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include <Collider.h>
+#include <SFML/Audio/Sound.hpp>
+
 #include "EntityTransform.h"
+#include "GameSound.h"
 #include "PerlinNoise.hpp"
 
 enum class HandSpawnDirection { FromLeft = 0, FromRight = 1, FromTop = 2, FromBottom = 3 };
@@ -28,6 +31,9 @@ struct Hand : sf::Drawable {
     float warningDuration = 0.5f;
     bool done {true};
     bool capturedPlayer{ false };
+
+    GameSound handFinishSound;
+    GameSound sonarSound;
 
     // Methods
     void Attack(HandSpawnDirection from, sf::View view, float speed, float offset);

@@ -2,8 +2,12 @@
 #include "Hand.h"
 #include "Player.h"
 #include "FoodItem.h"
+#include "GameMusic.h"
+#include "GameSound.h"
 #include "Gui/GameGui.h"
 #include "HandSpawner.h"
+#include "SFML/Audio/Music.hpp"
+#include <filesystem>
 
 enum class GameState
 {
@@ -23,6 +27,7 @@ struct GameSettings
 	float referenceResolutionY{ 144 };  // Reference Resolution for pixel art.
 	unsigned int screenWidth{ 1280 };
 	unsigned int screenHeight{ 720 };
+	float masterVolume{1.f};
 	std::string windowTitle{"Janky Game"};
 	bool fullscreen{ false };
 };
@@ -32,6 +37,7 @@ struct Game
 	Game(sf::RenderWindow* renderWindow);
 	~Game();
 	static Game* Instance;
+	static std::filesystem::path rootPath;
 
 	// Higher-level management Structs
 	GameSettings settings;
@@ -40,6 +46,7 @@ struct Game
 	sf::RenderTexture gameRenderTexture;
 	GameState currentState{ GameState::None };
 	int foodScore{ 0 };
+	bool paused{ false };
 
 	// Game Objects
 	GuiElement root_element;
@@ -67,8 +74,10 @@ struct Game
 	siv::PerlinNoise camNoise = siv::PerlinNoise(Hand::seed);
 
 	// Sound
-	std::vector<sf::Sound> munchSounds;
-	sf::Sound choirSound;
+	std::vector<GameSound> munchSounds;
+	GameSound choirSound;
+	static std::vector<GameSound*> registeredSounds;
+	static std::vector<GameMusic*> registeredMusic;
 
 	// Other
 	float gameSaturation{ 1.f };
@@ -83,19 +92,29 @@ struct Game
 	float lightSwitchDelay{ 0.75f };
 	float lightSwitchTimeLeft;
 	bool playDoor;
-	sf::Sound lightSwitchSound;
-	sf::Sound monsterSound;
-	sf::Sound rumbleSound;
-	sf::Sound doorSound;
-	sf::Sound footstepSound;
+	GameSound lightSwitchSound;
+	GameSound monsterSound;
+	GameSound rumbleSound;
+	GameSound doorSound;
+	GameSound footstepSound;
+	GameSound recordScratch;
+
+	GameMusic prePizzaMusic;
+	GameMusic gameplayMusic;
+	GameMusic mainMenuMusic;
+	GameMusic sadMusic;
 
 	// Methods
 	void SetGameState(GameState targetState);
 	void Initialize();
 	void ApplySettingsFromJson();
+	void SaveJsonSettings();
 	void ResetHands();
 	void ResetPlayer();
 	void Tick();
 	void Render();
-
+	void StopAllSounds();
+	void HandleResize(const sf::Vector2u& size);
+	void SetMasterVolume(float volume);
+	static std::string GetAbsolutePath(const std::string& path);
 };

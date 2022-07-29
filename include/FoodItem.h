@@ -22,5 +22,5 @@ struct FoodItem : sf::Drawable {
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override; // Inherited via Drawable
 
 private:
-	int randomIndex;
+	int randomIndex{0};
 };

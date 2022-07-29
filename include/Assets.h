@@ -3,6 +3,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
 #include "unordered_map"
+#include "Game.h"
 #include <iostream>
 
 template <typename T>
@@ -14,12 +15,12 @@ struct BasicAssetStore
 	{
 		if (store.contains(path))
 		{
-			std::cout << "Loading pre-existing resource from: " << path << std::endl;
+			// std::cout << "Loading pre-existing resource from: " << path << std::endl;
 			return store[path];
 		}
 
 		T newAsset;
-		if (!newAsset.loadFromFile(path))
+		if (!newAsset.loadFromFile(Game::GetAbsolutePath(path)))
 		{
 			return _empty;
 		}

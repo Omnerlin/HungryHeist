@@ -18,6 +18,7 @@ public:
 	const sf::RectangleShape& GetRectDrawable() const;
 	void SetColor(sf::Color color);
 	const sf::Color GetDebugColor() const;
+	void SetTexture(sf::Texture& texture, bool resetRect = false);
 
 	// Anchoring, Pivot
 	void SetAnchoredPosition(const sf::Vector2f& anchoredPosition);

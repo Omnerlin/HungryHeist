@@ -1,6 +1,8 @@
 #include <Collider.h>
 #include <Player.h>
 
+#include "Assets.h"
+
 bool Collider::HasCollisionDirectionEnabled(CollisionDirection direction) {
 	return (direction | collisionDirection) == collisionDirection;
 }
@@ -66,7 +68,7 @@ void Collider::InvokeCallbacks(const std::vector<std::function<void(Collider*)>>
 
 
 std::vector<Collider> LoadCollidersFromConfig() {
-	std::ifstream config("config/collision.json");
+	std::ifstream config(Game::GetAbsolutePath("config/collision.json"));
 	std::stringstream configBuffer;
 	configBuffer << config.rdbuf();
 
@@ -77,7 +79,7 @@ std::vector<Collider> LoadCollidersFromConfig() {
 		std::vector<Collider> returnValue;
 		// iterate the array
 		for (nlohmann::json::iterator it = j.begin(); it != j.end(); ++it) {
-			std::cout << *it << '\n';
+			//std::cout << *it << '\n';
 			nlohmann::json value = it.value();
 			Collider c;
 			float collisionSizeX = value["width"].get<float>();
@@ -87,8 +89,30 @@ std::vector<Collider> LoadCollidersFromConfig() {
 			float posY = value["y"].get<float>();
 			c.transform.SetWorldPosition(posX, posY);
 			c.colliderType = (ColliderType)value["type"].get<int>();
-			c.collisionDirection =
-				(CollisionDirection)value["direction"].get<int>();
+			c.collisionDirection = (CollisionDirection)value["direction"].get<int>();
+
+			if(value.contains("texture"))
+			{
+				std::string texturePath = value["texture"].get<std::string>();
+				if(!texturePath.empty())
+				{
+					auto texture = Assets::LoadTexture(texturePath);
+					// texture.setRepeated(true);
+					c.drawable.setTexture(&Assets::LoadTexture(texturePath));
+				}
+			}
+
+			if (value.contains("draw"))
+			{
+				c.draw = value["draw"].get<bool>();
+				if(c.draw && c.drawable.getTexture() == nullptr)
+				{
+					c.drawable.setFillColor(sf::Color(155, 103, 60));
+					c.drawable.setOutlineThickness(1.f);
+					c.drawable.setOutlineColor(sf::Color(50, 50, 50, 255));
+				}
+			}
+			
 			returnValue.push_back(c);
 		}
 		return returnValue;

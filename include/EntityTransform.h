@@ -31,7 +31,7 @@ struct EntityTransform {
 	void SetLocalScale(float x, float y);
 	void SetWorldScale(const sf::Vector2f& scale);
 	void SetWorldScale(float x, float y);
-	const sf::Vector2f& GetLossyScale();
+	const sf::Vector2f GetLossyScale();
 	const sf::Vector2f& GetLocalScale();
 	const sf::Vector2f& GetWorldScale();
 
@@ -78,5 +78,5 @@ protected:
 private:
 	sf::Transformable _worldTransformable;
 	sf::Transformable _localTransformable;
-	int _siblingIndex;
+	int _siblingIndex{-1};
 };

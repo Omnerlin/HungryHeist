@@ -102,12 +102,12 @@ void EntityTransform::SetWorldScale(float x, float y) {
 	SetWorldScale(sf::Vector2f(x,y));
 }
 
-const sf::Vector2f& EntityTransform::GetLossyScale() {
+const sf::Vector2f EntityTransform::GetLossyScale() {
 	if (_parent != nullptr) {
 		sf::Vector2f result = GetLossyScale();
 		sf::Vector2f localScale = GetLocalScale();
 
-		return { result.x * localScale.x, result.y * localScale.y };
+		return sf::Vector2f(result.x * localScale.x, result.y * localScale.y);
 	}
 	else {
 		return GetLocalScale();
