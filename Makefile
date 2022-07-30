@@ -1,11 +1,11 @@
 CXX := g++
-CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb
+CXX_FLAGS := -Wall -Wextra -std=c++20 -ggdb
 
 BIN := bin
 SRC := src
 INCLUDE := include
 LIB := lib
-LIBRARIES := -lsfml-graphics -lsfml-window -lsfml-system
+LIBRARIES := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 EXECUTABLE := main
 
 all: $(BIN)/$(EXECUTABLE)
@@ -15,7 +15,7 @@ run: clean all
 	@echo "Executing..."
 	./$(BIN)/$(EXECUTABLE)
 
-$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
+$(BIN)/$(EXECUTABLE): $(SRC)/*.cpp $(SRC)/Gui/*.cpp
 	@echo "🚧 Building..."
 	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
 
