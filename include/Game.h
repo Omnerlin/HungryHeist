@@ -6,7 +6,6 @@
 #include "GameSound.h"
 #include "Gui/GameGui.h"
 #include "HandSpawner.h"
-#include "SFML/Audio/Music.hpp"
 #include <filesystem>
 
 enum class GameState
@@ -70,8 +69,6 @@ struct Game
 	// Randomness
 	std::default_random_engine randGenerator;
 	std::uniform_int_distribution<int> foodItemDistribution{ 1, 7 };
-	siv::PerlinNoise::seed_type shakeSeed = 123456u;
-	siv::PerlinNoise camNoise = siv::PerlinNoise(Hand::seed);
 
 	// Sound
 	std::vector<GameSound> munchSounds;
@@ -116,5 +113,6 @@ struct Game
 	void StopAllSounds();
 	void HandleResize(const sf::Vector2u& size);
 	void SetMasterVolume(float volume);
+	void SetFullscreen(bool fullscreen);
 	static std::string GetAbsolutePath(const std::string& path);
 };

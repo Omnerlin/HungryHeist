@@ -1,5 +1,6 @@
 #include <Hand.h>
 #include <Utils.h>
+#include "Noise.h"
 
 sf::Color Hand::SkinColors[]{
 	sf::Color(255, 219, 172),
@@ -8,9 +9,6 @@ sf::Color Hand::SkinColors[]{
 	sf::Color(198, 134, 66),
 	sf::Color(141, 85, 36),
 };
-
-siv::PerlinNoise::seed_type Hand::seed = 123456u;
-siv::PerlinNoise Hand::Noise = siv::PerlinNoise(Hand::seed);
 
 void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float offset) {
 	done = false;
@@ -103,8 +101,8 @@ void Hand::Update(float deltaTime) {
 	case HandState::Waiting:
 	{
 		float intensity = 1.5f;
-		float noiseX = Noise.normalizedOctave1D(_timeSinceStateChange * 50, 1);
-		float noiseY = Noise.normalizedOctave1D(_timeSinceStateChange * 80, 1);
+		float noiseX = Noise::Instance.normalizedOctave1D(_timeSinceStateChange * 50, 1);
+		float noiseY = Noise::Instance.normalizedOctave1D(_timeSinceStateChange * 80, 1);
 		transform.SetWorldPosition(oldPosition.x + noiseX * intensity, oldPosition.y + noiseY * intensity);
 		if (_timeSinceStateChange >= _returnDelay)
 		{

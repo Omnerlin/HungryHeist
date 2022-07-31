@@ -14,9 +14,10 @@ struct Tween {
 
 };
 
-
 struct Tweener {
 	static Tween CreateTween();
+
+private:
 	std::vector<Tween> tweens;
 };
 

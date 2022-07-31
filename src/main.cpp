@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <SFML/Graphics.hpp>
+#include "Noise.h"
 #include <Game.h>
 
 #include "Input.h"

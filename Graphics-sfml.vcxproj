@@ -140,7 +140,6 @@
     <ClCompile Include="src\Gui\GuiElement.cpp" />
     <ClCompile Include="src\Gui\GuiSlider.cpp" />
     <ClCompile Include="src\Gui\GuiToggle.cpp" />
-    <ClCompile Include="src\Gui\GuiToggle\Source.cpp" />
     <ClCompile Include="src\Gui\GuiTransform.cpp" />
     <ClCompile Include="src\Hand.cpp" />
     <ClCompile Include="src\HandSpawner.cpp" />
@@ -178,7 +177,6 @@
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\SpriteAnimator.h" />
     <ClInclude Include="include\Tweener.h" />
-    <ClInclude Include="include\Typedefs.h" />
     <ClInclude Include="include\Utils.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

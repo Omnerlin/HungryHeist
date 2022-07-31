@@ -3,10 +3,8 @@
 #include <functional>
 #include <Collider.h>
 #include <SFML/Audio/Sound.hpp>
-
 #include "EntityTransform.h"
 #include "GameSound.h"
-#include "PerlinNoise.hpp"
 
 enum class HandSpawnDirection { FromLeft = 0, FromRight = 1, FromTop = 2, FromBottom = 3 };
 
@@ -19,8 +17,6 @@ struct Hand : sf::Drawable {
 
     // Members
     static sf::Color SkinColors[];
-    static siv::PerlinNoise::seed_type seed;
-    static siv::PerlinNoise Noise;
     enum HandState { Waiting, Warning, Attacking, Retreating };
     EntityTransform transform;
     EntityTransform grabTriggerTranform;

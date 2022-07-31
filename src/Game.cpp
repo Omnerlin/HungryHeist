@@ -1,7 +1,10 @@
 #include "Game.h"
 
+#include <random>
+
 #include "Assets.h"
 #include "Input.h"
+#include "Noise.h"
 #include "Physics.h"
 #include "Utils.h"
 #include "SFML/Audio/Listener.hpp"
@@ -165,7 +168,7 @@ void Game::Initialize()
 		if (col == &foodItem.collider) {
 			foodItem.AssignRandomType();
 			foodItem.transform.SetWorldPosition(-256.f / 2 + foodItemDistribution(randGenerator) * 32, -16 + -foodItemDistribution(randGenerator) * 16);
-			std::uniform_int_distribution<int> foodSoundDistribution(0, 2);
+			std::uniform_int_distribution foodSoundDistribution(0, 2);
 			munchSounds[foodSoundDistribution(randGenerator)].play();
 			foodScore++;
 			gui.SetScore(foodScore);
@@ -187,10 +190,6 @@ void Game::Initialize()
 	choirSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/choir.wav"));
 	rumbleSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/rumble.wav"));
 	lightSwitchSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/Switches/switch3.wav"));
-	//GameSound munch0, munch1, munch2;
-	//munch0.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_01.ogg"));
-	//munch1.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_03.ogg"));
-	//munch2.setBuffer(Assets::LoadSoundBuffer("assets/sounds/eat_04.ogg"));
 	munchSounds.reserve(3);
 	munchSounds.emplace_back(GameSound());
 	munchSounds.emplace_back(GameSound());
@@ -231,12 +230,11 @@ void Game::Initialize()
 		(float)window->getSize().y / settings.screenHeight);
 
 
-	gui.fullscreenToggle.onToggleChanged = [this](bool bol) {settings.fullscreen = bol;  window->create(settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode(settings.screenWidth, settings.screenHeight),
-		settings.windowTitle, settings.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
-	window->setFramerateLimit(60);
-	HandleResize({ window->getSize().x, window->getSize().y });
-	gameSprite.setScale((float)window->getSize().x / settings.screenWidth,
-		(float)window->getSize().y / settings.screenHeight);
+	gui.fullscreenToggle.onToggleChanged = [this](bool bol) {
+		SetFullscreen(bol);
+		HandleResize({ window->getSize().x, window->getSize().y });
+		gameSprite.setScale((float)window->getSize().x / settings.screenWidth,
+			(float)window->getSize().y / settings.screenHeight);
 	};
 	gui.volumeSlider.sliderValueChanged = [this](float value) { settings.masterVolume = value; SetMasterVolume(value); };
 
@@ -269,11 +267,7 @@ void Game::ApplySettingsFromJson()
 		std::cerr << e.what() << std::endl;
 	}
 
-	
-	window->create(settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode(settings.screenWidth, settings.screenHeight),
-		settings.windowTitle, settings.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
-	window->setFramerateLimit(60);
-
+	SetFullscreen(settings.fullscreen);
 
 	for (auto& col : colliders) {
 		Physics::DeregisterCollider(&col);
@@ -283,7 +277,6 @@ void Game::ApplySettingsFromJson()
 		Physics::RegisterCollider(&col);
 	}
 
-	//ResetPlayer();
 	player.LoadSettingsFromConfig();
 
 	std::cout << "Configuration Loaded." << std::endl;
@@ -327,7 +320,7 @@ void Game::ResetPlayer()
 void Game::Tick()
 {
 	float deltaTime = deltaClock.restart().asSeconds();
-	if(deltaTime > 1.f / 20.f)
+	if (deltaTime > 1.f / 20.f)
 	{
 		deltaTime = 1.f / 20.f;
 	}
@@ -399,8 +392,8 @@ void Game::Tick()
 			else
 			{
 				float intensity = 1.5f;
-				float noiseX = camNoise.normalizedOctave1D(monsterScreamTimeLeft * 20, 1);
-				float noiseY = camNoise.normalizedOctave1D(monsterScreamTimeLeft * 50, 1);
+				float noiseX = Noise::Instance.normalizedOctave1D(monsterScreamTimeLeft * 20, 1);
+				float noiseY = Noise::Instance.normalizedOctave1D(monsterScreamTimeLeft * 50, 1);
 				mainCamera.setCenter(sf::Vector2f(0.f, -settings.referenceResolutionY / 2.f) + sf::Vector2f(noiseX, noiseY) * intensity);
 				monsterScreamTimeLeft -= deltaTime;
 
@@ -500,6 +493,13 @@ void Game::SetMasterVolume(float volume)
 {
 	settings.masterVolume = volume;
 	sf::Listener::setGlobalVolume(volume * 100);
+}
+
+void Game::SetFullscreen(bool fullscreen)
+{
+	settings.fullscreen = fullscreen;  window->create(settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode(settings.screenWidth, settings.screenHeight),
+		settings.windowTitle, settings.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+	window->setFramerateLimit(60);
 }
 
 std::string Game::GetAbsolutePath(const std::string& path)
