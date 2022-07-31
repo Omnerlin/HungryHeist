@@ -10,6 +10,7 @@ void Gui::ProcessEvent(sf::Event& event)
 		_mousePosition = newMousePos;
 		if(_clickedElement != nullptr)
 		{
+			isDragging = true;
 			_clickedElement->HandleMouseDrag(_mouseDelta.x, _mouseDelta.y);
 		}
 	}
@@ -30,7 +31,12 @@ void Gui::ProcessEvent(sf::Event& event)
 					_hoveredElement->HandleMouseUp();
 				}
 			}
+			if(isDragging && _clickedElement != nullptr)
+			{
+				_clickedElement->HandleMouseDragEnd();
+			}
 			_clickedElement = nullptr;
+			isDragging = false;
 		}
 	}
 }

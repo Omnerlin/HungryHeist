@@ -63,3 +63,9 @@ void GuiButton::InitElement()
 	mouseUpSound.setBuffer(Assets::LoadSoundBuffer("assets/sounds/UI/rollover2.wav"));
 	mouseUpSound.SetBaseVolume(100);
 }
+
+void GuiButton::CopyButtonAttributesFrom(GuiButton& other)
+{
+	CopyAttributesFrom(other);
+	text.text.setFont(*other.text.text.getFont());
+}

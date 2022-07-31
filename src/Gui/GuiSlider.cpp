@@ -17,12 +17,29 @@ void GuiSlider::HandleMouseDrag(float deltaX, float deltaY)
 	SetValue(GetNormalizedValueFromMouse(), true);
 }
 
+void GuiSlider::HandleMouseDragEnd()
+{
+	std::cout << "Done dragging" << std::endl;
+	if(Game::Instance->gui._hoveredElement != this)
+	{
+		sliderHandle.SetTexture(Assets::LoadTexture("assets/textures/button2.png"), true);
+		sliderHandle.SetWorldScale(1, 1);
+	}
+}
+
 void GuiSlider::HandleMouseEnter()
 {
+	sliderHandle.SetTexture(Assets::LoadTexture("assets/textures/button.png"), true);
+	sliderHandle.SetWorldScale(1.25f, 1.25f);
 }
 
 void GuiSlider::HandleMouseExit()
 {
+	if(!Game::Instance->gui.isDragging)
+	{
+		sliderHandle.SetTexture(Assets::LoadTexture("assets/textures/button2.png"), true);
+		sliderHandle.SetWorldScale(1.0f, 1.0f);
+	}
 }
 
 void GuiSlider::InitElement()
@@ -44,7 +61,6 @@ void GuiSlider::InitElement()
 
 void GuiSlider::SetValue(float value, bool notify)
 {
-
 	if(currentValue != value)
 	{
 		currentValue = value;
@@ -54,7 +70,6 @@ void GuiSlider::SetValue(float value, bool notify)
 			sliderValueChanged(value);
 		}
 	}
-
 }
 
 float GuiSlider::GetNormalizedValueFromMouse()

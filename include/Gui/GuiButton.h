@@ -11,6 +11,7 @@ struct GuiButton : public GuiElement
 	virtual void HandleMouseEnter() override;
 	virtual void HandleMouseExit() override;
 	virtual void InitElement() override;
+	void CopyButtonAttributesFrom(GuiButton& other);
 
 	GameSound hoverSound;
 	GameSound mouseDownSound;

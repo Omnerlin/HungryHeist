@@ -36,6 +36,10 @@ void GuiElement::HandleMouseDrag(float deltaX, float deltaY)
 {
 }
 
+void GuiElement::HandleMouseDragEnd()
+{
+}
+
 void GuiElement::SetActiveHierarchy(bool active, bool shouldCaptureEvents)
 {
 	isActive = active;

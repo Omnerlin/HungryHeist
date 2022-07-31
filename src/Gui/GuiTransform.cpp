@@ -46,39 +46,12 @@ void GuiTransform::RebuildLayout(bool force)
 	sf::Vector2f newPosition = ScaleVector(parent->GetRectSize(), anchorMidpoint);
 	sf::Vector2f posDelta = (newPosition - prevPosition);
 
-	// Actually, we might need to take into account the following:
-	// 1. Parent pivot.x distance to anchor min x for left expansion
-	// 2. Parent pivot.x distance to anchor max x for right expansion
-	// 3. Parent pivot.y distance to anchor min y for up expansion
-	// 4. Parent pivot.y distance to anchor max y for down expansion
-	// Depending on final requirements and our pivot, we'll either expand or move.
-	// For example, if we need to expand left by 50 pixels and right by 50 pixels, but our pivot is at 0,0, we'll expand right by 100 pixels and move left by 50.
-	//float amountExpandLeft = parent->sizeDelta.x * parent->GetPivot().x;
-	//float amountExpandRight = parent->sizeDelta.x * (1 - parent->GetPivot().x);
-	//float amountExpandUp = parent->sizeDelta.y * parent->GetPivot().y;
-	//float amountExpandDown = parent->sizeDelta.y * (1 - parent->GetPivot().y);
-
 	float amountToMoveX = targetSizeDelta.x * (0.5 - GetPivot().x);
 	float amountToMoveY = targetSizeDelta.y * (0.5 - GetPivot().y);
 
-
-	// Get the distance between the paren't pivot and the center of the anchor point to get percentage movement.
-	sf::Vector2f parentPivot = parent->GetPivot();
-	//sf::Vector2f movePercentage(abs(anchorMidpoint.x - parentPivot.x), abs(anchorMidpoint.y - parentPivot.y));
-	//sf::Vector2f movePercentage(abs(anchorMidpoint.x - parent->GetPivot().x) - anchorMidpoint.x, abs(anchorMidpoint.y - parent->GetPivot().y) - anchorMidpoint.y);
-	 // sf::Vector2f movePercentage(1 - abs(_anchorMax.x - parentPivot.x), abs(anchorMidpoint.y - parentPivot.y));
 	sizeDelta = rect.getSize() - oldSize;
-	//SetLocalPosition(GetLocalPosition() + posDelta);
 	SetLocalPosition(GetLocalPosition() + (sf::Vector2f(-amountToMoveX, -amountToMoveY)) + posDelta);
 	SetPivot(_pivot);
-
-	//if (rect.getFillColor().r == 255) {
-	//	std::cout << std::to_string(GetWorldPosition().x) << " " << std::to_string(GetWorldPosition().y) << std::endl;
-	//}
-
-	//if (rect.getFillColor().g == 255) {
-	//	std::cout << "Target size delta: " << std::to_string(targetSizeDelta.x)  << " " << std::to_string(targetSizeDelta.y) << std::endl;
-	//}
 }
 
 void GuiTransform::UpdateTransforms()
@@ -141,17 +114,6 @@ void GuiTransform::SetTexture(sf::Texture& texture, bool resetRect)
 	rect.setTexture(&texture, resetRect);
 }
 
-void GuiTransform::SetAnchoredPosition(const sf::Vector2f& anchoredPosition)
-{
-	this->_anchoredPosition = anchoredPosition;
-	MarkDirty();
-}
-
-void GuiTransform::SetAnchoredPosition(float x, float y)
-{
-	SetAnchoredPosition({ x, y });
-}
-
 void GuiTransform::SetAnchorMin(const sf::Vector2f& anchorMin)
 {
 	_anchorMin = anchorMin;
@@ -180,11 +142,6 @@ void GuiTransform::SetAnchorMax(float x, float y)
 const sf::Vector2f& GuiTransform::GetAnchorMax() const
 {
 	return _anchorMax;
-}
-
-const sf::Vector2f& GuiTransform::GetAnchoredPosition() const
-{
-	return _anchoredPosition;
 }
 
 void GuiTransform::SetOrigin(const sf::Vector2f& origin)

@@ -5,7 +5,7 @@
 #include <Game.h>
 #include "Input.h"
 #if defined(_WIN64) || defined(_WIN32)
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+//#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
 /*

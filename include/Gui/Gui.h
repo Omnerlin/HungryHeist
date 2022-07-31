@@ -12,6 +12,7 @@ public:
 
 	GuiElement* _hoveredElement{ nullptr };
 	GuiElement* _clickedElement{ nullptr };
+	bool isDragging{ false };
 
 	void ProcessEvent(sf::Event& event);
 	//GuiElement* UpdateHoveredElement();

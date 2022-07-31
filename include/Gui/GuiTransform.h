@@ -21,9 +21,6 @@ public:
 	void SetTexture(sf::Texture& texture, bool resetRect = false);
 
 	// Anchoring, Pivot
-	void SetAnchoredPosition(const sf::Vector2f& anchoredPosition);
-	void SetAnchoredPosition(float x, float y);
-
 	void SetAnchorMin(const sf::Vector2f& anchorMin);
 	void SetAnchorMin(float x, float y);
 	const sf::Vector2f& GetAnchorMin() const;
@@ -31,8 +28,6 @@ public:
 	void SetAnchorMax(const sf::Vector2f& anchorMax);
 	void SetAnchorMax(float x, float y);
 	const sf::Vector2f& GetAnchorMax() const;
-	
-	const sf::Vector2f& GetAnchoredPosition() const;
 
 	// Pivot/Origin
 	void SetOrigin(const sf::Vector2f& origin) override;
@@ -45,7 +40,6 @@ public:
 protected:
 	sf::Vector2f _anchorMin {0,0};
 	sf::Vector2f _anchorMax {0,0};
-	sf::Vector2f _anchoredPosition{0,0};
 	sf::Vector2f _pivot {0,0};
 
 private:
