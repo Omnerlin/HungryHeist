@@ -32,6 +32,8 @@ void HandSpawner::Initialize()
 		newHand.grabTrigger.drawable.setSize(sf::Vector2f(50, 75) * newHand.transform.GetWorldScale().x);
 		newHand.handSprite.setTexture(Assets::LoadTexture("assets/textures/Hand.png"));
 		newHand.exclamationSprite.setTexture(Assets::LoadTexture("assets/textures/Exclamation.png"));
+		newHand.sonarBurst.drawable.setTexture(Assets::LoadTexture("assets/textures/sonar.png"));
+		newHand.sonarBurst.transform.SetOrigin(32, 32);
 		Physics::RegisterCollider(&newHand.grabTrigger);
 		newHand.transform.SetAttachedTransformable(&newHand.handSprite);
 		newHand.transform.SetOrigin(32, 0);

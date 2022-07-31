@@ -22,6 +22,7 @@ struct Hand : sf::Drawable {
     EntityTransform grabTriggerTranform;
     sf::Sprite handSprite;
     sf::Sprite exclamationSprite;
+    DrawnEntity<sf::Sprite> sonarBurst;
     Collider grabTrigger;
     std::function<void()> HandFinishCallback;
     float warningDuration = 0.5f;

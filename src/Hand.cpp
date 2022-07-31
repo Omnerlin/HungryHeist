@@ -50,9 +50,15 @@ void Hand::SetHandState(HandState state) {
 	oldPosition = transform.GetWorldPosition();
 	switch (state) {
 	case HandState::Warning:
+	{
 		sonarSound.play();
+		sf::Vector2u exclamationSize = exclamationSprite.getTexture()->getSize();
+		sonarBurst.transform.SetWorldPosition(exclamationSprite.getPosition().x + (float)exclamationSize.x / 2, exclamationSprite.getPosition().y + (float)exclamationSize.y / 2);
+		sonarBurst.transform.SetWorldScale(0, 0);
+		sonarBurst.drawable.setColor(sf::Color::White);
 		grabTrigger.enabled = false;
 		break;
+	}
 	case HandState::Attacking:
 		grabTrigger.enabled = true;
 		//grabTrigger.colliderType = ColliderType::Trigger;
@@ -112,9 +118,16 @@ void Hand::Update(float deltaTime) {
 	break;
 
 	case HandState::Warning:	// Warning that it is going to attack
+	{
+		float lerp = Lerp(0, 1, _timeSinceStateChange / warningDuration);
+		sonarBurst.transform.SetWorldScale(LerpVector({ 0,0 }, { 1,1 }, lerp));
+		sonarBurst.drawable.setColor(sf::Color(255, 255, 255, std::ranges::clamp(int(255 - lerp * 255), 0, 255)));
 		if (_timeSinceStateChange >= warningDuration)
+		{
 			SetHandState(HandState::Attacking);
+		}
 		break;
+	}
 
 	case HandState::Attacking:	// Move towards target
 		posX = Lerp(_homePosition.x, _targetPosition.x, _timeSinceStateChange / _speed);
@@ -151,11 +164,13 @@ void Hand::Update(float deltaTime) {
 
 void Hand::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
-	if(!done && _currentState != HandState::Warning)
-	{
+	if (!done) {
+		target.draw(sonarBurst);
+	}
+	if(!done && _currentState != HandState::Warning) {
 		target.draw(handSprite, states);
 	}
-	if (_currentState == HandState::Warning) {
+	else if (_currentState == HandState::Warning) {
 		target.draw(exclamationSprite, states);
 	}
 }
