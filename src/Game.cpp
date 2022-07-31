@@ -142,10 +142,10 @@ void Game::Initialize()
 	foodItem.Initialize();
 	ApplySettingsFromJson();
 	// Initialize Game Objects
-	background.setTexture(&Assets::LoadTexture("assets/textures/kitchen2.png"));
+	background.setTexture(&Assets::LoadTexture("assets/textures/customKitchen.png"));
 	background.setSize(sf::Vector2f(background.getTexture()->getSize().x, background.getTexture()->getSize().y));
-	background.setScale(background.getScale().x / 2, background.getScale().y / 2);
-	background.setOrigin(background.getSize().x / 2, background.getSize().y - 82);
+	background.setScale(1.2f, 1.2f);
+	background.setOrigin(background.getSize().x / 2 + 10, background.getSize().y - 50);
 
 	gameFont = &Assets::LoadFont("assets/fonts/LilitaOne.ttf");
 
@@ -325,17 +325,9 @@ void Game::Tick()
 		deltaTime = 1.f / 20.f;
 	}
 
-	if (currentState != GameState::MainMenu && currentState != GameState::End && Input::KeyWasPressed(KeyCode::Escape))
+	if(Input::KeyWasPressed(KeyCode::Escape))
 	{
-		paused = !paused;
-		if (paused)
-		{
-			gui.SetGuiState(GameGuiState::Pause);
-		}
-		else
-		{
-			gui.SetGuiState(GameGuiState::Play);
-		}
+		TrySetPaused(!paused);
 	}
 
 	if (!paused) {
@@ -500,6 +492,24 @@ void Game::SetFullscreen(bool fullscreen)
 	settings.fullscreen = fullscreen;  window->create(settings.fullscreen ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode(settings.screenWidth, settings.screenHeight),
 		settings.windowTitle, settings.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
 	window->setFramerateLimit(60);
+}
+
+void Game::TrySetPaused(bool shouldPause)
+{
+	if (paused == shouldPause) return;
+
+	if (currentState != GameState::MainMenu && currentState != GameState::End)
+	{
+		paused = shouldPause;
+		if (paused)
+		{
+			gui.SetGuiState(GameGuiState::Pause);
+		}
+		else
+		{
+			gui.SetGuiState(GameGuiState::Play);
+		}
+	}
 }
 
 std::string Game::GetAbsolutePath(const std::string& path)

@@ -20,25 +20,25 @@ void Hand::Attack(HandSpawnDirection from, sf::View view, float speed, float off
 		transform.SetLocalRotation(90);
 		_homePosition = sf::Vector2f(-viewHalfSize.x, -offset);
 		_targetPosition = sf::Vector2f(viewHalfSize.x, -offset);
-		exclamationSprite.setPosition(_homePosition.x, _homePosition.y - 16);
+		exclamationSprite.setPosition(_homePosition.x + exclamationSprite.getOrigin().x, _homePosition.y);
 		break;
 	case HandSpawnDirection::FromTop:
 		transform.SetLocalRotation(180);
 		_homePosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
 		_targetPosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
-		exclamationSprite.setPosition(_homePosition.x - 8, _homePosition.y);
+		exclamationSprite.setPosition(_homePosition.x, _homePosition.y + exclamationSprite.getOrigin().y);
 		break;
 	case HandSpawnDirection::FromRight:
 		transform.SetLocalRotation(270);
 		_homePosition = sf::Vector2f(viewHalfSize.x, -offset);
 		_targetPosition = sf::Vector2f(-viewHalfSize.x, -offset);
-		exclamationSprite.setPosition(_homePosition.x - 16, _homePosition.y - 16);
+		exclamationSprite.setPosition(_homePosition.x - exclamationSprite.getOrigin().x, _homePosition.y);
 		break;
 	case HandSpawnDirection::FromBottom:
 		transform.SetLocalRotation(0);
 		_homePosition = sf::Vector2f(-viewHalfSize.x + offset, 0);
 		_targetPosition = sf::Vector2f(-viewHalfSize.x + offset, -viewHalfSize.y * 2);
-		exclamationSprite.setPosition(_homePosition.x - 8, _homePosition.y - 32);
+		exclamationSprite.setPosition(_homePosition.x, _homePosition.y - exclamationSprite.getOrigin().y);
 		break;
 	}
 	transform.SetWorldPosition(_homePosition);
@@ -52,9 +52,9 @@ void Hand::SetHandState(HandState state) {
 	case HandState::Warning:
 	{
 		sonarSound.play();
-		sf::Vector2u exclamationSize = exclamationSprite.getTexture()->getSize();
-		sonarBurst.transform.SetWorldPosition(exclamationSprite.getPosition().x + (float)exclamationSize.x / 2, exclamationSprite.getPosition().y + (float)exclamationSize.y / 2);
+		sonarBurst.transform.SetWorldPosition(exclamationSprite.getPosition());
 		sonarBurst.transform.SetWorldScale(0, 0);
+		exclamationSprite.setScale(0, 0);
 		sonarBurst.drawable.setColor(sf::Color::White);
 		grabTrigger.enabled = false;
 		break;
@@ -122,6 +122,7 @@ void Hand::Update(float deltaTime) {
 		float lerp = Lerp(0, 1, _timeSinceStateChange / warningDuration);
 		sonarBurst.transform.SetWorldScale(LerpVector({ 0,0 }, { 1,1 }, lerp));
 		sonarBurst.drawable.setColor(sf::Color(255, 255, 255, std::ranges::clamp(int(255 - lerp * 255), 0, 255)));
+		exclamationSprite.setScale(LerpVectorClamped({ 0,0 }, { 1,1 }, _timeSinceStateChange / (warningDuration / 2)));
 		if (_timeSinceStateChange >= warningDuration)
 		{
 			SetHandState(HandState::Attacking);

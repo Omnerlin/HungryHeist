@@ -114,5 +114,6 @@ struct Game
 	void HandleResize(const sf::Vector2u& size);
 	void SetMasterVolume(float volume);
 	void SetFullscreen(bool fullscreen);
+	void TrySetPaused(bool shouldPause);
 	static std::string GetAbsolutePath(const std::string& path);
 };

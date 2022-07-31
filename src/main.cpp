@@ -5,7 +5,7 @@
 #include <Game.h>
 #include "Input.h"
 #if defined(_WIN64) || defined(_WIN32)
-//#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
 /*
@@ -36,12 +36,16 @@ int main(int arc, char** argv) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) window.close(); 
-			if (event.type == sf::Event::Resized) {
+			else if (event.type == sf::Event::Resized) {
 				sf::Vector2u newSize(event.size.width, event.size.height);
 				game.HandleResize(newSize);
 			}
-			if (event.type == sf::Event::KeyPressed) {
+			else if (event.type == sf::Event::KeyPressed) {
 				Input::AddKeyPress(event.key.code);
+			}
+			else if(event.type == sf::Event::LostFocus)
+			{
+				game.TrySetPaused(true);
 			}
 			game.gui.ProcessEvent(event);
 		}
