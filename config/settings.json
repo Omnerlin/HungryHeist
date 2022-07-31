@@ -1,1 +1,10 @@
-{"fullscreen":false,"masterVolume":0.0,"referenceResolutionX":256.0,"referenceResolutionY":144.0,"screenHeight":720,"screenWidth":1280,"timeBetweenHands":1.0,"windowTitle":"Janky Game"}
+{
+    "fullscreen": false,
+    "masterVolume": 0.0,
+    "referenceResolutionX": 256.0,
+    "referenceResolutionY": 144.0,
+    "screenHeight": 720,
+    "screenWidth": 1280,
+    "timeBetweenHands": 1.0,
+    "windowTitle": "Hungry Heist"
+}

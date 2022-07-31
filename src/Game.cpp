@@ -426,6 +426,7 @@ void Game::Tick()
 	const float scaleMod = Lerp(1.00f, 1.25f, (sinf(absoluteClock.getElapsedTime().asSeconds() * 6) + 1) / 2);
 	foodItem.foodSprite.transform.SetLocalScale(scaleMod, scaleMod);
 	player.animator.Update(deltaTime);
+	gui.title.SetLocalPosition(gui.title.GetLocalPosition().x, (sinf(absoluteClock.getElapsedTime().asSeconds() * 1.5) * 15));
 
 }
 

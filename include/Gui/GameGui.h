@@ -24,6 +24,7 @@ struct GameGui : Gui
 	void SetScore(int score);
 	sf::Font* gameFont;
 
+	GuiElement titleParent;
 	GUIText title;
 	GuiButton playButton;
 	GuiButton quitButton;

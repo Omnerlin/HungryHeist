@@ -98,13 +98,19 @@ void GameGui::BuildMenus()
 	home.SetAnchorMin(0, 0);
 	home.SetAnchorMax(1, 1);
 
-	title.SetParent(&home);
+	titleParent.SetParent(&home);
+	titleParent.SetColor(sf::Color::Transparent);
+	titleParent.SetLocalPosition(pausedPanel.GetRectSize().x / 2.f, 50);
+	titleParent.SetAnchorMin(0.5f, 0.25f);
+	titleParent.SetAnchorMax(0.5f, 0.25f);
+
+	title.SetParent(&titleParent);
 	title.text.setFillColor(sf::Color::White);
 	title.text.setFont(*gameFont);
-	title.text.setString("JANKY GAME");
+	title.text.setString("HUNGRY HEIST");
 	title.text.setOutlineThickness(3.f);
 	title.text.setCharacterSize(120);
-	title.SetLocalPosition(pausedPanel.GetRectSize().x / 2.f - title.text.getGlobalBounds().width / 2.f, 50);
+	title.SetLocalPosition(-title.text.getGlobalBounds().width / 2.f, 0);
 	title.SetAnchorMin(0.5f, 0.25f);
 	title.SetAnchorMax(0.5f, 0.25f);
 
