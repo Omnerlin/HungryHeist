@@ -105,14 +105,9 @@ void GameGui::BuildMenus()
 	titleParent.SetAnchorMax(0.5f, 0.25f);
 
 	title.SetParent(&titleParent);
-	title.text.setFillColor(sf::Color::White);
-	title.text.setFont(*gameFont);
+	title.CopyTextAttributesFrom(pausedText);
 	title.text.setString("HUNGRY HEIST");
-	title.text.setOutlineThickness(3.f);
-	title.text.setCharacterSize(120);
 	title.SetLocalPosition(-title.text.getGlobalBounds().width / 2.f, 0);
-	title.SetAnchorMin(0.5f, 0.25f);
-	title.SetAnchorMax(0.5f, 0.25f);
 
 	playButton.SetParent(&home);
 	playButton.SetRectSize(300, 50);
@@ -126,20 +121,15 @@ void GameGui::BuildMenus()
 	playButton.InitElement();
 
 	settingsButton.SetParent(&home);
-	settingsButton.SetRectSize(300, 50);
-	settingsButton.SetPivot({ 0.5f, 0.5f });
-	settingsButton.SetAnchorMin(0.4f, 0.5f);
-	settingsButton.SetAnchorMax(0.6f, 0.5f);
-	settingsButton.SetLocalPosition(1280.f / 2, 720.f * 0.55f);
-	settingsButton.text.text.setFont(*gameFont);
+	settingsButton.CopyButtonAttributesFrom(playButton);
 	settingsButton.text.text.setString("SETTINGS");
 	settingsButton.captureEvents = true;
+	settingsButton.SetLocalPosition(1280.f / 2, 720.f * 0.55f);
 	settingsButton.InitElement();
 
 	quitButton.SetParent(&home);
-	quitButton.CopyAttributesFrom(playButton);
+	quitButton.CopyButtonAttributesFrom(playButton);
 	quitButton.SetLocalPosition(1280.f / 2, 720.f * 0.65f);
-	quitButton.text.text.setFont(*gameFont);
 	quitButton.text.text.setString("QUIT");
 	quitButton.InitElement();
 
@@ -148,14 +138,9 @@ void GameGui::BuildMenus()
 	settingsPanel.CopyAttributesFrom(home);
 
 	settingsTitle.SetParent(&settingsPanel);
-	settingsTitle.CopyAttributesFrom(title);
-	settingsTitle.text.setFont(*gameFont);
+	settingsTitle.CopyTextAttributesFrom(title);
 	settingsTitle.text.setString("SETTINGS");
-	settingsTitle.text.setOutlineThickness(3.f);
-	settingsTitle.text.setCharacterSize(120);
 	settingsTitle.SetLocalPosition(pausedPanel.GetRectSize().x / 2.f - settingsTitle.text.getGlobalBounds().width / 2.f, 50);
-	settingsTitle.SetAnchorMin(0.5f, 0.25f);
-	settingsTitle.SetAnchorMax(0.5f, 0.25f);
 
 	fullscreenToggle.SetParent(&settingsPanel);
 	fullscreenToggle.SetPivot({ 0.5f, 0.5f });
@@ -178,23 +163,14 @@ void GameGui::BuildMenus()
 	volumeSlider.SetRectSize(200, volumeSlider.GetRectSize().y);
 
 	volumeText.SetParent(&volumeSlider);
-	volumeText.text.setFont(*gameFont);
+	volumeText.CopyTextAttributesFrom(fullscreenToggle.text);
 	volumeText.text.setString("VOLUME");
-	volumeText.text.setCharacterSize(40);
-	volumeText.SetAnchorMin(0.0f, 0.5f);
-	volumeText.SetAnchorMax(0.0f, 0.5f);
 	volumeText.SetLocalPosition(-volumeText.text.getGlobalBounds().width - 50, -5);
-	volumeText.text.setOutlineThickness(fullscreenToggle.text.text.getOutlineThickness());
-	volumeText.text.setOutlineColor(fullscreenToggle.text.text.getOutlineColor());
 
 
 	settingsReturnButton.SetParent(&settingsPanel);
-	settingsReturnButton.SetRectSize(300, 50);
-	settingsReturnButton.SetPivot({ 0.5f, 0.5f });
-	settingsReturnButton.SetAnchorMin(0.4f, 0.5f);
-	settingsReturnButton.SetAnchorMax(0.6f, 0.5f);
+	settingsReturnButton.CopyButtonAttributesFrom(playButton);
 	settingsReturnButton.SetLocalPosition(1280.f / 2, 720.f * 0.75f);
-	settingsReturnButton.text.text.setFont(*gameFont);
 	settingsReturnButton.text.text.setString("RETURN");
 	settingsReturnButton.captureEvents = true;
 	settingsReturnButton.InitElement();
@@ -204,32 +180,19 @@ void GameGui::BuildMenus()
 	end.CopyAttributesFrom(home);
 
 	gameOverText.SetParent(&end);
-	gameOverText.text.setFillColor(sf::Color::White);
-	gameOverText.text.setFont(*gameFont);
+	gameOverText.CopyTextAttributesFrom(title);
 	gameOverText.text.setString("GAME OVER");
-	gameOverText.text.setOutlineThickness(3.f);
-	gameOverText.text.setCharacterSize(80);
 	gameOverText.SetLocalPosition(pausedPanel.GetRectSize().x / 2.f - gameOverText.text.getGlobalBounds().width / 2.f, 30);
-	gameOverText.SetAnchorMin(0.5f, 0.25f);
-	gameOverText.SetAnchorMax(0.5f, 0.25f);
 
 	gameOverStats.SetParent(&end);
-	gameOverStats.text.setFillColor(sf::Color::White);
-	gameOverStats.text.setFont(*gameFont);
-	gameOverStats.text.setString("Food Eaten:");
-	gameOverStats.text.setOutlineThickness(3.f);
+	gameOverStats.CopyTextAttributesFrom(gameOverText);
 	gameOverStats.text.setCharacterSize(40);
-	gameOverStats.SetLocalPosition(pausedPanel.GetRectSize().x / 2.f - gameOverStats.text.getGlobalBounds().width / 2.f, 150);
-	gameOverStats.SetAnchorMin(0.5f, 0.25f);
-	gameOverStats.SetAnchorMax(0.5f, 0.25f);
+	gameOverStats.text.setString("Food Eaten:");
+	gameOverStats.SetLocalPosition(pausedPanel.GetRectSize().x / 2.f - gameOverStats.text.getGlobalBounds().width / 2.f, 175);
 
 	replayButton.SetParent(&end);
-	replayButton.SetRectSize(300, 50);
-	replayButton.SetPivot({ 0.5f, 0.5f });
-	replayButton.SetAnchorMin(0.4f, 0.5f);
-	replayButton.SetAnchorMax(0.6f, 0.5f);
+	replayButton.CopyButtonAttributesFrom(playButton);
 	replayButton.SetLocalPosition(1280.f / 2, 720.f * 0.45f);
-	replayButton.text.text.setFont(*gameFont);
 	replayButton.text.text.setString("REPLAY");
 	replayButton.InitElement();
 

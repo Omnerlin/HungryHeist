@@ -29,3 +29,13 @@ void GUIText::UpdateTransforms()
 	text.setRotation(GetWorldRotation());
 	text.setScale(GetWorldScale());
 }
+
+void GUIText::CopyTextAttributesFrom(GUIText& other)
+{
+	CopyAttributesFrom(other);
+	text.setFont(*other.text.getFont());
+	text.setFillColor(other.text.getFillColor());
+	text.setOutlineColor(other.text.getOutlineColor());
+	text.setOutlineThickness(other.text.getOutlineThickness());
+	text.setCharacterSize(other.text.getCharacterSize());
+}

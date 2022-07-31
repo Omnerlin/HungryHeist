@@ -10,5 +10,6 @@ struct GUIText : public GuiElement
 	virtual void UpdateElementBasedOnTransform() override;
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 	virtual void UpdateTransforms() override;
+	void CopyTextAttributesFrom(GUIText& other);
 };
 
