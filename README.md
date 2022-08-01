@@ -10,9 +10,9 @@ SFML 2.5.1 (May work with older versions)
 
 ## Build Instructions
 
-NOTE: This project was built using a few C++20 features, namely reverse_view for convenience.
-This may cause issues when building for Mac or Linux if your comiler isn't up-to-date.
-reverse_view usage can be swapped out for the older reverse_iterator approach if needed.
+NOTE: This project was built using a few C++20 features, namely reverse_view for convenience.  
+This may cause issues when building for Mac or Linux if your comiler isn't up-to-date.  
+reverse_view usage can be swapped out for the older reverse_iterator approach if needed.  
 
 ### Windows (Visual Studio)
 
@@ -32,3 +32,20 @@ Copy over the ```assets``` folder, ```config``` folder, and ```Credits.txt``` fi
 ## Known Bugs
 - Sometimes the GUI doesn't always resize when it should when maximizing, restoring, and changing to/from fullscreen
 - Sometimes the cat's head doesn't position itself correctly when getting caught.. usually only seems to happen the first time which is odd.
+
+## Attributions
+UI SFX set by Kenney Vleugels (www.kenney.nl)
+
+jump.wav - used from [12 Player Movement SFX](https://opengameart.org/content/12-player-movement-sfx) by Leohpaz on OpenGameArt.org  
+[(CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/legalcode)
+
+recordScratch.wav sound effect created by Paul Virostek from Airborne Sound: [Variety 2 pack](https://soundcloud.com/airbornesound/variety-2-sound-effects-1)
+
+gameplayMusic.wav - [Tactical Pursuit](https://opengameart.org/content/tactical-pursuit) by Matthew Pablo on OpenGameArt.org [(CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/legalcode)  
+This was shortened by me for better looping in the game.
+
+forestLoop.ogg - [Loop - House In A Forest](https://opengameart.org/content/loop-house-in-a-forest) by HorrorPen on OpenGameArt.org [(CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/legalcode)
+
+preEatMusic.wav - [Insrumental Symphony (2 Tracks)](https://opengameart.org/content/instrumental-symphony-2-tracks) by Alexandr Zhelanov on OpenGameArt.org  
+https://soundcloud.com/alexandr-zhelanov  
+[(CC BY 3.0)](https://creativecommons.org/licenses/by/3.0/legalcode)  
