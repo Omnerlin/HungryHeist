@@ -6,7 +6,7 @@ Other libraries used:
 - [json](https://github.com/nlohmann/json) (By nlohmann)
 
 ### Dependencies
-SFML 2.5.1 (May work with older versions)
+[SFML 2.5.1](https://www.sfml-dev.org/download.php) (May work with older versions)
 
 ## Build Instructions
 
