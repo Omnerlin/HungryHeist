@@ -11,7 +11,8 @@ enum GameGuiState
 	Play,
 	End,
 	Pause,
-	Settings
+	Settings,
+	Credits
 };
 
 
@@ -31,6 +32,7 @@ struct GameGui : Gui
 	GuiButton replayButton;
 	GuiButton endQuitButton;
 	GuiButton homeButton;
+	GuiButton creditsButton;
 	GUIText scoreText;
 
 	GUIText pausedText;
@@ -43,10 +45,14 @@ struct GameGui : Gui
 	GuiToggle fullscreenToggle;
 	GuiButton settingsReturnButton;
 	GUIText volumeText;
-
 	
 	GUIText gameOverText;
 	GUIText gameOverStats;
+
+	GuiElement creditsPanel;
+	GUIText creditsTitle;
+	std::vector<GUIText> guiTexts;
+	GuiButton creditsReturnButton;
 
 private:
 	GameGuiState _guiState = GameGuiState::None;

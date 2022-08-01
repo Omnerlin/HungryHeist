@@ -26,6 +26,8 @@ void GameGui::SetGuiState(GameGuiState state)
 	case GameGuiState::Settings:
 		settingsPanel.SetActiveHierarchy(false, false);
 		break;
+	case GameGuiState::Credits:
+		creditsPanel.SetActiveHierarchy(false, false);
 	}
 
 	switch (state)
@@ -38,6 +40,7 @@ void GameGui::SetGuiState(GameGuiState state)
 		quitButton.visualElement.captureEvents = false;
 		fullscreenToggle.visualElement.captureEvents = false;
 		settingsButton.visualElement.captureEvents = false;
+		creditsButton.visualElement.captureEvents = false;
 		break;
 	case GameGuiState::End:
 		end.SetChildrenActive(true, true);
@@ -63,6 +66,9 @@ void GameGui::SetGuiState(GameGuiState state)
 		fullscreenToggle.visualElement.captureEvents = false;
 		settingsReturnButton.visualElement.captureEvents = false;
 		break;
+	case GameGuiState::Credits:
+		creditsPanel.SetChildrenActive(true, true);
+		creditsReturnButton.visualElement.captureEvents = false;
 	}
 
 	_guiState = state;
@@ -127,11 +133,66 @@ void GameGui::BuildMenus()
 	settingsButton.SetLocalPosition(1280.f / 2, 720.f * 0.55f);
 	settingsButton.InitElement();
 
+	creditsButton.SetParent(&home);
+	creditsButton.CopyButtonAttributesFrom(playButton);
+	creditsButton.text.text.setString("CREDITS");
+	creditsButton.captureEvents = true;
+	creditsButton.SetLocalPosition(1280.f / 2, 720.f * 0.65f);
+	creditsButton.InitElement();
+
 	quitButton.SetParent(&home);
 	quitButton.CopyButtonAttributesFrom(playButton);
-	quitButton.SetLocalPosition(1280.f / 2, 720.f * 0.65f);
+	quitButton.SetLocalPosition(1280.f / 2, 720.f * 0.75f);
 	quitButton.text.text.setString("QUIT");
 	quitButton.InitElement();
+
+	// ==== Build Credits Menu ====
+	creditsPanel.SetParent(root);
+	creditsPanel.CopyAttributesFrom(pausedPanel);
+	creditsPanel.SetColor(sf::Color(0, 0, 0, 125));
+
+	creditsTitle.SetParent(&creditsPanel);
+	creditsTitle.CopyTextAttributesFrom(title);
+	creditsTitle.text.setString("CREDITS");
+	creditsTitle.SetAnchorMin(0.5f, 0);
+	creditsTitle.SetAnchorMax(0.5f, 0);
+	creditsTitle.SetLocalPosition(creditsPanel.GetRectSize().x / 2.f - creditsTitle.text.getGlobalBounds().width / 2.f, 25);
+
+	// NOTE: This is a weird workaround for SFML text causing really strange performance problems with long strings...
+	// We get some bonus center-justified text though!
+	guiTexts.reserve(50);
+	std::stringstream stringSplitss(Game::Instance->settings.credits);
+	std::string to;
+	int count = 0;
+	float totalPositionY = 0;
+	while(std::getline(stringSplitss, to, '\n'))
+	{
+		if(to == "<br>")
+		{
+			totalPositionY += 15.f;
+			continue;
+		}
+		guiTexts.emplace_back(GUIText());
+		GUIText* newText = &guiTexts[guiTexts.size() - 1];
+		newText->SetParent(&creditsPanel);
+		newText->CopyTextAttributesFrom(playButton.text);
+		newText->SetAnchorMin(0.5f, 0.5f);
+		newText->SetAnchorMax(0.5f, 0.5f);
+		newText->text.setCharacterSize(count == 0 ? 32 : 18);
+		newText->text.setOutlineThickness(1);
+		newText->text.setString(to);
+		newText->SetLocalPosition(1280.f / 2.f - newText->text.getGlobalBounds().width / 2.f, 150 + (totalPositionY + 1));
+		totalPositionY += newText->text.getGlobalBounds().height;
+		count++;
+	}
+
+	creditsReturnButton.SetParent(&creditsPanel);
+	creditsReturnButton.CopyButtonAttributesFrom(playButton);
+	creditsReturnButton.SetLocalPosition(1280.f / 2, 720.f * 0.85f);
+	creditsReturnButton.SetAnchorMin(0.5f, 1);
+	creditsReturnButton.SetAnchorMax(0.5f, 1);
+	creditsReturnButton.text.text.setString("RETURN");
+	creditsReturnButton.InitElement();
 
 	// ==== Build Settings Menu ====
 	settingsPanel.SetParent(root);
@@ -223,6 +284,7 @@ void GameGui::BuildMenus()
 	scoreText.SetActiveHierarchy(false, false);
 	settingsPanel.SetActiveHierarchy(false, false);
 	pausedPanel.SetActiveHierarchy(false, false);
+	creditsPanel.SetActiveHierarchy(false, false);
 }
 
 void GameGui::draw(sf::RenderTarget& target, sf::RenderStates states) const

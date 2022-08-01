@@ -21,6 +21,7 @@ struct Player {
 	float jumpForce{ 600.f };
 	float airDrag{ 1000.f };
 	bool grounded{ false };
+	bool isJumping{ false };
 	bool groundedLastFrame{ false };
 	bool running{ false };
 	bool facingLeft{ false };

@@ -29,6 +29,7 @@ struct GameSettings
 	float masterVolume{1.f};
 	std::string windowTitle{"Janky Game"};
 	bool fullscreen{ false };
+	std::string credits{""};
 };
 
 struct Game

@@ -225,6 +225,10 @@ void Game::Initialize()
 	gui.homeButton.onClick.emplace_back([this]() { SetGameState(GameState::MainMenu); });
 	gui.settingsButton.onClick.emplace_back([this]() { gui.SetGuiState(GameGuiState::Settings); });
 	gui.settingsReturnButton.onClick.emplace_back([this]() { SaveJsonSettings(); gui.SetGuiState(GameGuiState::Home); });
+	gui.creditsButton.onClick.emplace_back([this]() {gui.SetGuiState(GameGuiState::Credits); });
+	gui.creditsReturnButton.onClick.emplace_back([this]() {gui.SetGuiState(GameGuiState::Home); });
+	/*gui.creditsText.text.setString(settings.credits);*/
+
 	HandleResize({ settings.screenWidth, settings.screenHeight });
 	gameSprite.setScale((float)window->getSize().x / settings.screenWidth,
 		(float)window->getSize().y / settings.screenHeight);
@@ -250,7 +254,9 @@ void Game::ApplySettingsFromJson()
 	std::ifstream config(GetAbsolutePath("config/settings.json"));
 	std::stringstream configBuffer;
 	configBuffer << config.rdbuf();
+	config.close();
 
+	// Load json config settings
 	try {
 		nlohmann::json json = nlohmann::json::parse(configBuffer.str());
 		settings.timeBetweenHands = json["timeBetweenHands"].get<float>();
@@ -263,7 +269,22 @@ void Game::ApplySettingsFromJson()
 		settings.masterVolume = json["masterVolume"].get<float>();
 	}
 	catch (const std::exception& e) {
-		std::cout << "Error opening game config file." << e.what() << std::endl;
+		std::cout << "Error opening game config file." << std::endl;
+		std::cerr << e.what() << std::endl;
+	}
+
+	// Load Credits file
+	try
+	{
+		std::ifstream attributionsFile(GetAbsolutePath("Credits.txt"));
+		std::stringstream buffer;
+		buffer << attributionsFile.rdbuf();
+		settings.credits = buffer.str();
+		attributionsFile.close();
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Error opening credits file." << std::endl;
 		std::cerr << e.what() << std::endl;
 	}
 
@@ -325,7 +346,7 @@ void Game::Tick()
 		deltaTime = 1.f / 20.f;
 	}
 
-	if(Input::KeyWasPressed(KeyCode::Escape))
+	if (Input::KeyWasPressed(KeyCode::Escape))
 	{
 		TrySetPaused(!paused);
 	}
@@ -429,9 +450,11 @@ void Game::Render()
 			gameRenderTexture.draw(collider);
 		}
 	}
-	for (const auto& hand : handSpawner.hands)
+	if(currentState == GameState::Gameplay || currentState == GameState::End)
 	{
-		gameRenderTexture.draw(hand);
+		for (const auto& hand : handSpawner.hands) {
+			gameRenderTexture.draw(hand);
+		}
 	}
 	gameRenderTexture.draw(player.sprite);
 	gameRenderTexture.draw(foodItem);
@@ -441,12 +464,8 @@ void Game::Render()
 	saturationShader.setUniform("saturation", gameSaturation);
 	window->draw(gameSprite, &saturationShader);
 	window->setView(guiCamera);
-
-
 	window->draw(gui);
-
 	window->setView(window->getDefaultView());
-	// Render to window
 	window->display();
 }
 

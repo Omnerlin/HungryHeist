@@ -27,8 +27,7 @@ void Player::LoadSettingsFromConfig() {
 		float collisionSizeX = json["playerCollisionSizeX"].get<float>();
 		float collisionSizeY = json["playerCollisionSizeY"].get<float>();
 		collider.drawable.setSize(sf::Vector2f(collisionSizeX, collisionSizeY));
-		collider.transform.SetOrigin(collider.drawable.getSize().x / 2,
-			collider.drawable.getSize().y);
+		collider.transform.SetOrigin(collider.drawable.getSize().x / 2, collider.drawable.getSize().y);
 		sprite.transform.SetOrigin(sprite.drawable.getTexture()->getSize().x / 2.f, sprite.drawable.getTexture()->getSize().y);
 		groundAcceleration = json["playerGroundAcceleration"].get<float>();
 		friction = json["playerFriction"].get<float>();
@@ -55,7 +54,7 @@ void Player::Update(float deltaTime) {
 		return;
 	}
 
-	if(inputEnabled)
+	if (inputEnabled)
 	{
 		// Held Keys
 		if (Input::KeyIsDown(KeyCode::A)) {
@@ -70,10 +69,15 @@ void Player::Update(float deltaTime) {
 			AddVelocity(sf::Vector2f((deltaTime * groundAcceleration), 0.f));
 			facingLeft = true;
 		}
-		if (Input::KeyWasPressed(KeyCode::Space) && grounded) {
+		if (Input::KeyIsDown(KeyCode::Space) && grounded) {
 			AddVelocity(0, -jumpForce);
 			jumpSound.play();
+			isJumping = true;
 		}
+		//else if(!Input::KeyIsDown(KeyCode::Space) && isJumping && velocity.y < -200 && velocity.y > -250)
+		//{
+		//	velocity.y = 0;
+		//}
 	}
 
 	if (!grounded)
@@ -122,7 +126,8 @@ void Player::Update(float deltaTime) {
 		transform.SetWorldPosition(transform.GetWorldPosition().x, floorOffset);
 		velocity.y = 0;
 		grounded = true;
-		if(!groundedLastFrame)
+		isJumping = false;
+		if (!groundedLastFrame)
 		{
 			landingSound.play();
 		}
@@ -197,7 +202,8 @@ void Player::ResolveMovementCollision(Collider* other) {
 		prevPosition.y <= (bounds.top)) {
 		// We hit the top
 		grounded = true;
-		if(!groundedLastFrame)
+		isJumping = false;
+		if (!groundedLastFrame)
 		{
 			landingSound.play();
 		}
