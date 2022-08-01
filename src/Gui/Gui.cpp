@@ -1,6 +1,5 @@
 #include "Gui/Gui.h"
 #include <iostream>
-#include <ranges>
 
 void Gui::ProcessEvent(sf::Event& event)
 {
@@ -64,9 +63,9 @@ GuiElement* Gui::UpdateHoveredElement(GuiElement* element)
 
 	if (!element->isActive) return nullptr;
 	auto children = element->GetChildren();
-	for (auto childItr : std::ranges::reverse_view(*children))
+	for (auto childItr = children->rbegin(); childItr != children->rend(); ++childItr)
 	{
-		GuiElement* test = dynamic_cast<GuiElement*>(childItr);
+		GuiElement* test = dynamic_cast<GuiElement*>(*childItr);
 		if (test == nullptr) continue;
 		if (!test->GetChildren()->empty())
 		{

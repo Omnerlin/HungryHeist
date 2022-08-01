@@ -121,7 +121,7 @@ void Hand::Update(float deltaTime) {
 	{
 		float lerp = Lerp(0, 1, _timeSinceStateChange / warningDuration);
 		sonarBurst.transform.SetWorldScale(LerpVector({ 0,0 }, { 1,1 }, lerp));
-		sonarBurst.drawable.setColor(sf::Color(255, 255, 255, std::ranges::clamp(int(255 - lerp * 255), 0, 255)));
+		sonarBurst.drawable.setColor(sf::Color(255, 255, 255, std::clamp(int(255 - lerp * 255), 0, 255)));
 		exclamationSprite.setScale(LerpVectorClamped({ 0,0 }, { 1,1 }, _timeSinceStateChange / (warningDuration / 2)));
 		if (_timeSinceStateChange >= warningDuration)
 		{
