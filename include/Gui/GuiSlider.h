@@ -5,6 +5,8 @@
 struct GuiSlider : GuiElement
 {
 	GuiButton sliderHandle;
+	sf::Texture baseHandleTexture;
+	sf::Texture highlightTexture;
 	std::function<void(float)> sliderValueChanged; // normalized (0-1)
 	float currentValue;
 	bool isDragging{false};
