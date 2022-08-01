@@ -8,11 +8,7 @@ Other libraries used:
 ### Dependencies
 [SFML 2.5.1](https://www.sfml-dev.org/download.php) (May work with older versions)
 
-## Build Instructions
-
-NOTE: This project was built using a few C++20 features, namely reverse_view for convenience.  
-This may cause issues when building for Mac or Linux if your comiler isn't up-to-date.  
-reverse_view usage can be swapped out for the older reverse_iterator approach if needed.  
+## Build Instructions  
 
 ### Windows (Visual Studio)
 
