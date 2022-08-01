@@ -4,20 +4,22 @@ Attributions:
 <br>
 UI SFX set by Kenney Vleugels (www.kenney.nl)
 <br>
-jump.wav sound used from the "12 Player Movement SFX" sound pack from OpenGameArt.org (Made by Leohpaz) (CC)
-Link: https://opengameart.org/content/12-player-movement-sfx
+jump.wav - used from "12 Player Movement SFX" sound pack from OpenGameArt.org (Made by Leohpaz)
+CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode)
+Source: https://opengameart.org/content/12-player-movement-sfx
 <br>
 recordScratch.wav sound effect created by Paul Virostek from Airborne Sound: Variety 2 pack
-Link to full pack here: https://soundcloud.com/airbornesound/variety-2-sound-effects-1
+Link to full pack: https://soundcloud.com/airbornesound/variety-2-sound-effects-1
 <br>
 gameplayMusic.wav - Original creation is "Tactical Pursuit" by Matthew Pablo on OpenGameArt.org
 This was shortened by me for better looping in the game.
-Link to Page: https://opengameart.org/content/tactical-pursuit
+Source: https://opengameart.org/content/tactical-pursuit
+CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/legalcode)
 <br>
 forestLoop.ogg - Original creation is "Loop - House In A Forest" by HorrorPen on OpenGameArt.org
-Link to Page: https://opengameart.org/content/loop-house-in-a-forest
+Source: https://opengameart.org/content/loop-house-in-a-forest
+CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/legalcode)
 <br>
-preEatMusic.wav - Original creation is "Insrumental Symphony (2 Tracks)" by Alexandr Zhelanov on OpenGameArt.org
-I shortened this track from the original for better looping and smaller filesize.
-https://soundcloud.com/alexandr-zhelanov
-Link to Page: https://opengameart.org/content/instrumental-symphony-2-tracks
+preEatMusic.wav - "Insrumental Symphony (2 Tracks)" by Alexandr Zhelanov (https://soundcloud.com/alexandr-zhelanov) on OpenGameArt.org 
+Source: https://opengameart.org/content/instrumental-symphony-2-tracks
+CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/legalcode)

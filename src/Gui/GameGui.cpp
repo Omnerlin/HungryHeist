@@ -154,6 +154,7 @@ void GameGui::BuildMenus()
 	creditsTitle.SetParent(&creditsPanel);
 	creditsTitle.CopyTextAttributesFrom(title);
 	creditsTitle.text.setString("CREDITS");
+	creditsTitle.text.setCharacterSize(80);
 	creditsTitle.SetAnchorMin(0.5f, 0);
 	creditsTitle.SetAnchorMax(0.5f, 0);
 	creditsTitle.SetLocalPosition(creditsPanel.GetRectSize().x / 2.f - creditsTitle.text.getGlobalBounds().width / 2.f, 25);
@@ -181,7 +182,7 @@ void GameGui::BuildMenus()
 		newText->text.setCharacterSize(count == 0 ? 32 : 18);
 		newText->text.setOutlineThickness(1);
 		newText->text.setString(to);
-		newText->SetLocalPosition(1280.f / 2.f - newText->text.getGlobalBounds().width / 2.f, 150 + (totalPositionY + 1));
+		newText->SetLocalPosition(1280.f / 2.f - newText->text.getGlobalBounds().width / 2.f, 125 + (totalPositionY));
 		totalPositionY += newText->text.getGlobalBounds().height;
 		count++;
 	}
