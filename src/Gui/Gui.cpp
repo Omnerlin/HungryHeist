@@ -1,46 +1,61 @@
 #include "Gui/Gui.h"
 #include <iostream>
 
-void Gui::ProcessEvent(sf::Event& event)
+void Gui::ProcessEvent(const sf::Event& event)
 {
-	if (event.type == sf::Event::MouseMoved) {
-		const sf::Vector2f newMousePos = { (float)event.mouseMove.x, (float)event.mouseMove.y };
-		_mouseDelta = newMousePos - _mousePosition;
-		_mousePosition = newMousePos;
-		if(_clickedElement != nullptr)
-		{
-			isDragging = true;
-			_clickedElement->HandleMouseDrag(_mouseDelta.x, _mouseDelta.y);
-		}
-	}
-	if (event.type == sf::Event::MouseButtonPressed) {
-		if (event.mouseButton.button == sf::Mouse::Button::Left) {
-			// Click on our hovered element if we have it
-			if (_hoveredElement != nullptr) {
-				_clickedElement = _hoveredElement;
-				_hoveredElement->HandleMouseDown();
-			}
-		}
-	}
-	if (event.type == sf::Event::MouseButtonReleased) {
-		if (event.mouseButton.button == sf::Mouse::Button::Left) {
-			// Click on our hovered element if we have it
-			if (_hoveredElement != nullptr) {
-				if (_hoveredElement == _clickedElement) {
-					_hoveredElement->HandleMouseUp();
+
+	switch (event.type)
+	{
+		case sf::Event::MouseMoved:
+			{
+				const sf::Vector2f newMousePos = { (float)event.mouseMove.x, (float)event.mouseMove.y };
+				_mouseDelta = newMousePos - _mousePosition;
+				_mousePosition = newMousePos;
+				if (_clickedElement != nullptr)
+				{
+					isDragging = true;
+					_clickedElement->HandleMouseDrag(_mouseDelta.x, _mouseDelta.y);
 				}
 			}
-			if(isDragging && _clickedElement != nullptr)
+			break;
+
+		case sf::Event::MouseButtonPressed:
 			{
-				_clickedElement->HandleMouseDragEnd();
+				if (event.mouseButton.button == sf::Mouse::Button::Left) {
+					// Click on our hovered element if we have it
+					if (_hoveredElement != nullptr) {
+						_clickedElement = _hoveredElement;
+						_hoveredElement->HandleMouseDown();
+					}
+				}
 			}
-			_clickedElement = nullptr;
-			isDragging = false;
-		}
+			break;
+
+		case sf::Event::MouseButtonReleased:
+			{
+				if (event.mouseButton.button == sf::Mouse::Button::Left) {
+					// Click on our hovered element if we have it
+					if (_hoveredElement != nullptr) {
+						if (_hoveredElement == _clickedElement) {
+							_hoveredElement->HandleMouseUp();
+						}
+					}
+					if (isDragging && _clickedElement != nullptr)
+					{
+						_clickedElement->HandleMouseDragEnd();
+					}
+					_clickedElement = nullptr;
+					isDragging = false;
+				}
+			}
+			break;
+
+		default:
+			break;
 	}
 }
 
-void Gui::UpdateHoveredElementNew()
+void Gui::RootUpdateHoveredElement()
 {
 	GuiElement* element = UpdateHoveredElement(root);
 

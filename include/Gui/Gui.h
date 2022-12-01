@@ -14,9 +14,9 @@ public:
 	GuiElement* _clickedElement{ nullptr };
 	bool isDragging{ false };
 
-	void ProcessEvent(sf::Event& event);
+	void ProcessEvent(const sf::Event& event);
 	//GuiElement* UpdateHoveredElement();
-	void UpdateHoveredElementNew();
+	void RootUpdateHoveredElement();
 	GuiElement* UpdateHoveredElement(GuiElement* element);
 	const sf::Vector2f& GetMousePosition();
 

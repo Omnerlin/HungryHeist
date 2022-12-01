@@ -52,7 +52,7 @@ int main(int arc, char** argv) {
 
 		game.Tick();
 		game.gui.root->UpdateTransforms();
-		game.gui.UpdateHoveredElementNew();
+		game.gui.RootUpdateHoveredElement();
 		game.Render();
 	}
 
